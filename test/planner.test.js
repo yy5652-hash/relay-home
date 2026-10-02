@@ -158,6 +158,9 @@ test('natural-language constraints carry across a draft and can be removed', () 
   assert.equal(parseMessage('Plan dinner under $ 8', fixture().preferences).preferences.budget, 8);
   assert.match(parseMessage('Plan dinner under $1e3', fixture().preferences).reason, /budget from \$0 to \$100/);
   assert.match(parseMessage('Plan dinner under $8,000', fixture().preferences).reason, /budget from \$0 to \$100/);
+  for (const message of ['Plan dinner under bananas', 'Plan dinner under ten dollars', 'Plan dinner with budget nonsense', 'Plan dinner under $']) {
+    assert.match(parseMessage(message, fixture().preferences).reason, /Nothing was planned/, message);
+  }
   assert.match(parseMessage('Plan dinner in 500 minutes', fixture().preferences).reason, /whole-number cooking time/);
   assert.match(parseMessage('Plan dinner in 0 minutes', fixture().preferences).reason, /whole-number cooking time/);
   assert.match(parseMessage('Plan dinner in 1e3 minutes', fixture().preferences).reason, /whole-number cooking time/);
