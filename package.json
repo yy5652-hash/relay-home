@@ -1,0 +1,11 @@
+{
+  "name": "relay-home",
+  "version": "0.1.0",
+  "packageManager": "pnpm@11.25.0",
+  "private": true,
+  "type": "module",
+  "description": "A consent-first household replanning assistant with a real Streamable HTTP MCP server.",
+  "engines": { "node": ">=24" },
+  "scripts": { "start": "node src/server.js", "test": "node --test", "check:mcp": "node scripts/check-mcp.js" },
+  "dependencies": { "@modelcontextprotocol/sdk": "1.31.0", "express": "5.1.0", "zod": "3.25.76" }
+}
