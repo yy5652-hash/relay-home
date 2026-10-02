@@ -159,10 +159,10 @@ export function parseMessage(message, currentPreferences) {
   if (!supported) return { intent: 'unknown' };
   const preferences = structuredClone(currentPreferences);
   const budgetPhrase = text.match(/(?:under|budget(?: of| is)?|less than|max(?:imum)?)\s*(?:\$\s*)?(\S+)/);
-  const budgetToken = budgetPhrase && /^[\d.-]/.test(budgetPhrase[1]) ? budgetPhrase[1] : text.match(/\$\s*(\S+)/)?.[1];
-  if (budgetToken) {
-    const amount = budgetToken.replace(/[.,!?;:]+$/, '').replace('$', '');
-    if (!/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(amount) || Number(amount) > 100) return { intent: 'invalid', reason: 'Use a budget from $0 to $100, with no more than two decimal places. Nothing was planned.' };
+  const budgetToken = budgetPhrase?.[1] ?? text.match(/\$\s*(\S+)/)?.[1];
+  if (budgetToken || /\b(?:under|budget|less than|max(?:imum)?)\b|\$/.test(text)) {
+    const amount = budgetToken?.replace(/[.,!?;:]+$/, '').replace('$', '');
+    if (!amount || !/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(amount) || Number(amount) > 100) return { intent: 'invalid', reason: 'Use a budget from $0 to $100, with no more than two decimal places. Nothing was planned.' };
     preferences.budget = Number(amount);
   }
   const duration = text.match(/(\S+)\s*(?:minutes?|mins?)\b/);
