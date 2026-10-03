@@ -138,6 +138,16 @@ test('natural-language constraints carry across a draft and can be removed', () 
   assert.deepEqual(followup.preferences.excluded, []);
   assert.equal(followup.preferences.budget, 2);
   assert.equal(followup.preferences.maxMinutes, 20);
+  for (const qualifier of ['under', 'less than', 'max', 'maximum']) {
+    for (const unit of ['minutes', 'mins']) {
+      const durationOnly = parseMessage(`Plan dinner ${qualifier} 30 ${unit}`, first.preferences);
+      assert.deepEqual(durationOnly.preferences, { ...first.preferences, maxMinutes: 30 }, `${qualifier} 30 ${unit}`);
+      const withBudget = parseMessage(`Plan dinner ${qualifier} 30 ${unit} under $8`, first.preferences);
+      assert.deepEqual(withBudget.preferences, { ...first.preferences, budget: 8, maxMinutes: 30 });
+      const budgetFirst = parseMessage(`Plan dinner under $8 ${qualifier} 30 ${unit}`, first.preferences);
+      assert.deepEqual(budgetFirst.preferences, withBudget.preferences);
+    }
+  }
   for (const name of ['Jo', 'Sam', 'Alex']) {
     for (const phrase of ['is not available', 'cannot make it', "can't make it", 'can’t make it']) {
       const unavailable = parseMessage(`${name} ${phrase}`, followup.preferences);
