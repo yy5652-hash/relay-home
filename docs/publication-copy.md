@@ -1,12 +1,12 @@
-# Publication copy — owner review required
+# Publication copy and status
 
-Status: copy prepared for owner review; no public YouTube/Vimeo upload or publication. The owner authorized the private GitHub repository below, but reviewer access has not been granted or verified. The owner must review the entire video and make the final public video publication decision.
+Status: published with the owner's explicit authorization on October 3, 2026: https://youtu.be/MR2rbJVQxB8. YouTube displayed Video published, and the channel Content page retained Public after refresh. The owner confirmed not made for kids; the timed English SRT was published. Copyright checks found no issues at publication time. Signed-in playback began; independent signed-out playback is not yet verified because the unauthenticated web fetch failed. The GitHub repository remains private; reviewer access has not been granted or verified.
 
-## Suggested video title
+## Published video title
 
 Relay Home | A consent-first household planner with a real MCP server
 
-## Suggested video description
+## Published video description
 
 A school pickup moves earlier. Relay Home checks approved helpers, dinner time, pantry ingredients and a grocery budget, then presents one reviewable evening plan. A tighter budget changes dinner. If nobody approved can arrive on time, Relay explains the blocker. If a proposed helper later declines, the household owner can record that response and review a new proposal.
 After a page reload, Relay can distinguish that new unsaved proposal from earlier local changes.
@@ -37,6 +37,6 @@ Consent-first household replanning prototype with a self-hosted MCP server, Stre
 
 1. Review the complete 155.09-second video and the English narration; confirm it represents the code being submitted and includes no unapproved content.
 2. The owner chose a private repository. Obtain separate authorization and verify access for the required Amazon and Devpost reviewers near submission time. No reviewer invitation has been sent.
-3. After separate owner approval, upload the MP4 to YouTube or Vimeo, optionally attach the SRT, and set visibility to public. Do not treat an upload spinner, a GitHub video file or a private draft as public video publication.
+3. Completed October 3: uploaded the MP4 and timed SRT, then published as Public after separate owner approval. YouTube publication confirmation and the refreshed channel listing were verified.
 4. Open the final video URL while signed out to verify public playback, English audio, complete duration and chapter order. Paste the verified URL into the Devpost submission.
 5. The owner handles Devpost eligibility, identity, ownership, legal acceptance and final submission; verify the resulting entry and receipt before calling the competition entry complete.
