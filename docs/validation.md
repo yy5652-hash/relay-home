@@ -4,6 +4,8 @@ Verified October 2, 2026 on the local workspace using Node.js 24.19.0, pnpm 11.2
 
 ## Automated checks
 
+October 3 follow-up: a failing regression reproduced `Plan dinner under 30 minutes` incorrectly replacing an existing $2 grocery budget with $30. Cooking-time phrases now remain separate from budget phrases. Unit assertions cover `under`, `less than`, `max` and `maximum`, plus explicit budgets before or after the time constraint. The restarted HTTP/MCP workflow also verifies that a time-only follow-up keeps the $2 cap, changes the cooking limit to 20 minutes, leaves tasks unsaved and carries both constraints into the next independent MCP request. All 24 tests pass after the fix. The rebuilt delivery ZIP is checked byte for byte against this tested source; the cleanroom installation checks below describe the October 2 packages.
+
 `node --test`: **24 passed, 0 failed** after adding cross-session MCP draft recovery and competing-draft rejection coverage. The Host-header test uses a raw Node HTTP request because Fetch did not send the intended spoofed Host.
 
 Coverage includes:
