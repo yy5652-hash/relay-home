@@ -158,9 +158,10 @@ export function parseMessage(message, currentPreferences) {
   const supported = namedAvailability || /\b(plan|replan|evening|dinner|pickup|pick up|budget|under|vegetarian|minutes|unavailable|cannot|can't)\b/.test(text);
   if (!supported) return { intent: 'unknown' };
   const preferences = structuredClone(currentPreferences);
-  const budgetPhrase = text.match(/(?:under|budget(?: of| is)?|less than|max(?:imum)?)\s*(?:\$\s*)?(\S+)/);
-  const budgetToken = budgetPhrase?.[1] ?? text.match(/\$\s*(\S+)/)?.[1];
-  if (budgetToken || /\b(?:under|budget|less than|max(?:imum)?)\b|\$/.test(text)) {
+  const budgetText = text.replace(/\b(?:under|less than|max(?:imum)?)\s+\d+\s*(?:minutes?|mins?)\b/g, '');
+  const budgetPhrase = budgetText.match(/\b(?:under|budget(?: of| is)?|less than|max(?:imum)?)\s*(?:\$\s*)?(\S+)/);
+  const budgetToken = budgetPhrase?.[1] ?? budgetText.match(/\$\s*(\S+)/)?.[1];
+  if (budgetToken || /\b(?:under|budget|less than|max(?:imum)?)\b|\$/.test(budgetText)) {
     const amount = budgetToken?.replace(/[.,!?;:]+$/, '').replace('$', '');
     if (!amount || !/^(?:\d+(?:\.\d{1,2})?|\.\d{1,2})$/.test(amount) || Number(amount) > 100) return { intent: 'invalid', reason: 'Use a budget from $0 to $100, with no more than two decimal places. Nothing was planned.' };
     preferences.budget = Number(amount);
