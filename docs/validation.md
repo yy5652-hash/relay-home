@@ -49,6 +49,10 @@ Coverage includes:
 
 Screenshots are observed application states with synthetic data. They are not evidence of a live Alexa integration or actual caregiver communication.
 
+## Video publication — October 3, 2026
+
+With explicit owner authorization and confirmation of the not-made-for-kids audience setting, the prepared MP4 and English SRT were uploaded. YouTube confirmed English subtitles published and reported no copyright issues at that time. Selecting Public and publishing produced a Video published confirmation for https://youtu.be/MR2rbJVQxB8. A refreshed channel Content page still listed Public. The signed-in watch page loaded and playback began, displaying 2:35; Studio rounded the duration to 2:36. Independent signed-out playback remains unverified because the unauthenticated web fetch returned Cache miss. Publication does not establish Devpost submission or reviewer repository access.
+
 ## Not verified
 
-External deployment, live accounts/connectors, real households, assistive-technology user testing, public GitHub reviewer access, public video availability, Devpost registration, submission receipt, official eligibility determination and judging score.
+External deployment, live accounts/connectors, real households, assistive-technology user testing, GitHub reviewer access, independent signed-out video playback, Devpost registration, submission receipt, official eligibility determination and judging score.
