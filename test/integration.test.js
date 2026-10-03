@@ -70,18 +70,20 @@ test('MCP resumes a draft and its constraints after a server restart', async () 
       const resumed = (await client.callTool({ name: 'preview_evening', arguments: {} })).structuredContent;
       assert.equal(resumed.preferences.budget, 2);
       assert.equal(resumed.helper, null);
-      for (const [message, helper] of [['Jo is available', 'Jo'], ['Jo can’t make it', null], ['Jo is available', 'Jo']]) {
+      for (const [message, helper, maxMinutes] of [['Jo is available', 'Jo', 30], ['Jo can’t make it', null, 30], ['Jo is available', 'Jo', 30], ['Plan dinner under 20 minutes', 'Jo', 20]]) {
         const response = await fetch(`${isolated.baseUrl}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Relay-CSRF': isolatedCsrf }, body: JSON.stringify({ message }) });
         assert.equal(response.status, 200);
         const reply = await response.json();
         assert.equal(reply.plan.helper, helper);
         assert.equal(reply.plan.preferences.budget, 2);
+        assert.equal(reply.plan.preferences.maxMinutes, maxMinutes);
         assert.deepEqual(reply.trace.map(item => item.name), ['tools/list', 'household_context', 'preview_evening']);
         assert.deepEqual(reply.state.tasks, []);
         assert.equal(reply.state.activePlan, null);
       }
       const revised = (await client.callTool({ name: 'preview_evening', arguments: { excluded: [] } })).structuredContent;
       assert.equal(revised.preferences.budget, 2);
+      assert.equal(revised.preferences.maxMinutes, 20);
       assert.equal(revised.helper, 'Jo');
       const confirmation = await fetch(`${isolated.baseUrl}/api/confirm`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Relay-CSRF': isolatedCsrf }, body: JSON.stringify({ planId: revised.id }) });
       assert.equal(confirmation.status, 200);
