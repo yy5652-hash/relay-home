@@ -1,0 +1,244 @@
+1
+00:00:00,000 --> 00:00:02,030
+Pickup just moved earlier.
+
+2
+00:00:02,040 --> 00:00:04,050
+Your train is late. And dinner?
+
+3
+00:00:04,060 --> 00:00:06,790
+Still not sorted. Meet Relay Home.
+
+4
+00:00:06,800 --> 00:00:09,070
+One change, one evening to rethink.
+
+5
+00:00:09,080 --> 00:00:10,610
+Let's see how it works.
+
+6
+00:00:10,620 --> 00:00:13,280
+All the household data
+in this demo is made up.
+
+7
+00:00:14,208 --> 00:00:18,858
+First, Relay checks who's approved
+to help, what everyone's schedule allows,
+
+8
+00:00:18,868 --> 00:00:20,598
+and what's in the pantry.
+
+9
+00:00:20,608 --> 00:00:23,038
+Jo can arrive fifteen minutes early.
+
+10
+00:00:23,048 --> 00:00:27,098
+Dinner needs just three dollars
+and twenty cents in extra ingredients.
+
+11
+00:00:27,108 --> 00:00:28,818
+Those calls on screen?
+
+12
+00:00:28,828 --> 00:00:34,128
+They're real MCP requests to our
+self-hosted server over Streamable HTTP.
+
+13
+00:00:35,083 --> 00:00:36,913
+But let's tighten the budget.
+
+14
+00:00:36,923 --> 00:00:39,233
+Two dollars. Twenty minutes.
+
+15
+00:00:39,243 --> 00:00:44,153
+Relay switches to chickpea tomato soup,
+using what's already in the demo pantry.
+
+16
+00:00:44,163 --> 00:00:47,853
+It's a deterministic planner,
+not a general language model.
+
+17
+00:00:47,863 --> 00:00:52,883
+The same MCP tools also accept
+structured requests from another client.
+
+18
+00:00:53,750 --> 00:00:55,820
+Looks good? You confirm.
+
+19
+00:00:55,830 --> 00:00:58,580
+Relay saves the local
+tasks and shopping list.
+
+20
+00:00:58,590 --> 00:01:01,200
+It hasn't messaged Jo or bought anything.
+
+21
+00:01:01,210 --> 00:01:03,960
+Pickup still needs a real acknowledgment.
+
+22
+00:01:03,970 --> 00:01:06,780
+Stale previews, expired
+plans, and repeat clicks
+
+23
+00:01:06,790 --> 00:01:10,990
+can't silently turn
+into extra commitments.
+
+24
+00:01:11,000 --> 00:01:12,530
+Now refresh.
+
+25
+00:01:12,540 --> 00:01:14,050
+The plan is still here.
+
+26
+00:01:14,060 --> 00:01:15,890
+So is the conversation.
+
+27
+00:01:15,900 --> 00:01:18,090
+And this isn't just browser memory.
+
+28
+00:01:18,100 --> 00:01:22,860
+Our integration tests restart the server
+and check that the same state comes back.
+
+29
+00:01:23,667 --> 00:01:26,097
+Changed your mind? Undo.
+
+30
+00:01:26,107 --> 00:01:29,517
+Previous tasks, preferences,
+and the shopping list come back.
+
+31
+00:01:29,527 --> 00:01:31,157
+The change is recorded.
+
+32
+00:01:31,167 --> 00:01:34,007
+And the assistant can't
+press confirm for you.
+
+33
+00:01:34,667 --> 00:01:36,657
+Now Jo can't make it.
+
+34
+00:01:36,667 --> 00:01:38,837
+Nobody approved can arrive on time.
+
+35
+00:01:38,847 --> 00:01:41,977
+Relay says so, and removes
+the confirm action.
+
+36
+00:01:41,987 --> 00:01:45,757
+No guessing. No handing pickup
+to an unapproved neighbor.
+
+37
+00:01:45,767 --> 00:01:48,887
+An honest blocker beats
+a reassuring mistake.
+
+38
+00:01:49,417 --> 00:01:52,407
+Good news: Sam's meeting ends early.
+
+39
+00:01:52,417 --> 00:01:54,467
+That makes the old preview stale.
+
+40
+00:01:54,477 --> 00:01:57,407
+Replan, and now a parent can make pickup.
+
+41
+00:01:57,417 --> 00:02:02,467
+This is an independent Alexa-plus
+simulation, not a live Alexa connection.
+
+42
+00:02:02,477 --> 00:02:07,357
+The app runs locally, with no
+paid API or device required.
+
+43
+00:02:08,125 --> 00:02:10,935
+But what if Sam declines
+after you've saved?
+
+44
+00:02:10,945 --> 00:02:12,575
+Record that response.
+
+45
+00:02:12,585 --> 00:02:16,675
+Relay restores the previous local plan,
+excludes Sam, and checks the other
+
+46
+00:02:16,685 --> 00:02:19,335
+approved helpers through MCP.
+
+47
+00:02:19,345 --> 00:02:21,535
+Jo becomes a new proposal.
+
+48
+00:02:21,545 --> 00:02:23,235
+Still no message sent.
+
+49
+00:02:23,245 --> 00:02:24,565
+Still your decision.
+
+50
+00:02:25,333 --> 00:02:27,003
+One more refresh.
+
+51
+00:02:27,013 --> 00:02:28,503
+What does Relay remember?
+
+52
+00:02:28,513 --> 00:02:31,423
+Jo is a draft, not a confirmed pickup.
+
+53
+00:02:31,433 --> 00:02:34,003
+Earlier saved changes are kept distinct.
+
+54
+00:02:34,013 --> 00:02:38,663
+Another MCP client can read that
+context after a server restart.
+
+55
+00:02:38,673 --> 00:02:41,223
+Twenty-four automated tests pass.
+
+56
+00:02:41,233 --> 00:02:44,458
+Plans change. You stay in control.
