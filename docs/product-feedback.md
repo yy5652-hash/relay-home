@@ -1,6 +1,6 @@
 # Product feedback and friction log
 
-Prepared October 2, 2026. Review before submitting. This is feedback on observed documentation and the tools actually used; it does not claim hands-on testing of gated Alexa+ tooling.
+Prepared October 2, 2026; updated October 3 after publication of the Heart narration edition. Review before submitting. This is feedback on observed documentation and the tools actually used; it does not claim hands-on testing of gated Alexa+ tooling. Demo-production tools are separated from application runtime dependencies below.
 
 ## Tools used and purpose
 
@@ -61,3 +61,31 @@ Yes, for the open MCP SDK and independent simulator workflow: the typed tool int
 3. Nice-to-have: a simulator trace view that displays structured results and negotiated protocol version.
 
 Do not report a bonus as earned. The rules describe a possible friction-log bonus of up to 10%; organizers decide whether this feedback qualifies.
+
+## Demo-production tools — not application runtime integrations
+
+These tools prepared the demonstration, not the household planner. Their use does not establish a live Alexa connection, an AWS integration, or eligibility for another track or mini challenge.
+
+### Kokoro Heart through the official Hugging Face demo
+
+- Purpose and onboarding: selected `af_heart` in the official Chrome-accessed demo, used CPU at speed 1, and generated ten English narration clips without a paid API or subscription. The owner selected this voice; `narration-provenance.json` records the settings and published asset hash.
+- Worked well: all ten clips were generated and incorporated into the 164.45-second demonstration. The existing original video was retained rather than overwritten.
+- Needs work: this browser-based production flow still needed a separate local alignment and caption-authoring step. We did not establish that the model or demo promises caption export, so this is a workflow improvement request, not a reported product defect.
+- Would use again: yes, for short synthetic narration with separate quality checks and clear disclosure. No human listening review or general pronunciation-quality claim is made here.
+- Suggested improvement: optionally export timestamped captions alongside the generated clip, with an explicit warning that timings still need review.
+
+### faster-whisper 1.2.1 with base.en
+
+- Purpose and onboarding: ran locally on CPU to align the known 379-word narration script and independently transcribe the rendered audio. It is not part of the planner and does not provide a voice-input feature to users.
+- Worked well: produced 56 timed English cues; the complete script was retained, and isolated rechecks helped investigate two initially uncertain recognition passages.
+- Needs work: transcription can differ in numeral formatting and Jo/Joe spelling. Known-script alignment alone cannot prove that the audio actually contains every word, which is why a separate unprompted transcription was used.
+- Would use again: yes, as an assisted captioning and diagnostic step, not a replacement for listening. No platform defect is inferred from the initial recognition differences.
+
+### FFmpeg through imageio-ffmpeg
+
+- Purpose and onboarding: used local media commands to assemble captured application footage, encode H.264/AAC, preserve the selected narration, and render the aligned captions into the existing footer.
+- Worked well: the final file decoded through all 3,932 frames, and audio-packet hashing confirmed that caption rendering did not replace the selected narration. Caption placement keeps the application controls visible.
+- Needs work: correct cue layout, complete picture coverage and preserved audio required explicit checks in our production workflow. We observed no FFmpeg defect in those checks; this is not a wider reliability claim.
+- Would use again: yes, for repeatable local rendering with frame-count, audio and visual verification.
+
+The evidence and limits for this production work are summarized in `demo-video.md`, `narration-provenance.json` and `validation.md`. These additions disclose supporting tools; they are not extra Amazon platform friction-log entries or a claim that a bonus has been earned.
