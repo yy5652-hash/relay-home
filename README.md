@@ -98,6 +98,8 @@ Manual browser checks cover preview, confirmation, reload, undo, helper-refusal 
 
 ## Submission status
 
+The owner-selected Heart narration edition is available as `docs/relay-home-heart.mp4` (164.45 seconds), with aligned English captions in `docs/relay-home-heart.srt` and generation details in `docs/narration-provenance.json`. The original local video is retained. Public upload of the Heart edition is authorized but not yet completed; the existing public link below still points to the original edition.
+
 Local runnable prototype and materials are prepared. The owner authorized the private repository at https://github.com/yy5652-hash/relay-home and separately authorized the [public demonstration video](https://youtu.be/MR2rbJVQxB8), published October 3, 2026 with English subtitles. YouTube Studio confirmed publication and retained Public after refresh; independent signed-out playback is not yet verified. Reviewer access, Devpost registration, eligibility declarations and final competition receipt remain unverified or unfinished. See `docs/submission.md` for draft copy, `docs/product-feedback.md` for observed feedback and `docs/publication-copy.md` for publication details.
 
 No open-source license has been selected by the owner. For a public submission, choose and include a license first. Alternatively use the official private-GitHub-repository path and grant the specified reviewers access around submission time. Do not claim the Open Source or AWS Builder mini challenge for this version.
