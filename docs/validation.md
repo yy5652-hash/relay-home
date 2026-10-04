@@ -56,3 +56,9 @@ With explicit owner authorization and confirmation of the not-made-for-kids audi
 ## Not verified
 
 External deployment, live accounts/connectors, real households, assistive-technology user testing, GitHub reviewer access, independent signed-out video playback, Devpost registration, submission receipt, official eligibility determination and judging score.
+
+## Heart narration revision — October 3, 2026
+
+The owner chose Kokoro `af_heart` and authorized the new video publication and private-repository update. The ten synthetic English narration clips were generated through the official demo in Chrome using CPU at speed 1. The 164.45-second captioned edition decodes through all 3,932 frames. Its 56 timed cues retain all 379 script words, use at most two lines of 42 characters, and have non-overlapping intervals. Timing is based on automatic word alignment. An unprompted local transcription plus isolated checks of the two initially uncertain passages found no obvious omitted passage; this is not a manual listening review. Ten scene frames were visually checked, and the caption footer does not cover the application UI.
+
+GitHub commit `dc7df43e0fd3e67f6d79c78df0f80e82e103f19c` adds the new MP4, SRT and narration provenance. Their remote Git blob SHAs match the local files, including the complete binary video. The source code, dependency lockfile, original video and original SRT are unchanged; no new application-test result is claimed for this media-only revision. The upload of the new YouTube edition has not begun while the owner's action-time confirmation of its upload terms is pending. The original public video remains available at the link above. No reviewer access was granted and no competition entry was submitted.
