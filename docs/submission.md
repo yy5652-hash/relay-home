@@ -1,6 +1,6 @@
-# Submission copy — owner review required
+# Submission copy and verified status
 
-Status: local draft, not submitted. Intended primary track: **Alexa+**, working self-hosted MCP server with an independent web simulator. Do not select AWS Builder or Open Source for the current prototype.
+Status: Devpost entry 1216490 was verified **Submitted**, with **5/5 steps done**, on October 4, 2026. The official My projects listing independently confirmed Submitted for [Relay Home](https://devpost.com/software/relay-home). Primary track: **Alexa+**, working self-hosted MCP server with an independent web simulator. Neither AWS Builder nor Open Source is selected for the current prototype. Reviewer access to the private GitHub repository remains unresolved; submission is not evidence of that access or of judging success.
 
 ## Project name
 
@@ -64,13 +64,13 @@ JavaScript, Node.js, Express, Zod, Model Context Protocol, HTML, CSS, Node test 
 
 ## Submission fields and remaining gates
 
-- GitHub repository URL: https://github.com/yy5652-hash/relay-home (private; reviewer access has not been granted or verified).
-- The owner authorized creating this private repository and uploading the reviewed project, and separately authorized public video publication. Reviewer invitations and final competition submission remain unauthorized.
+- GitHub repository URL: https://github.com/yy5652-hash/relay-home (private; October 4 access settings showed zero collaborators and no invitations).
+- The owner authorized creating this private repository and uploading the reviewed project, and separately authorized public video publication. The coding assistant did not click the final Devpost Submit project button; its later read-only verification found the entry Submitted. Reviewer invitations remain unauthorized and have not been sent by this task.
 - Current public demo video: https://youtu.be/avoHrgCZtCM — Heart edition published October 3, 2026 with Kokoro synthetic English narration, burned-in captions and uploaded timed English SRT. YouTube Studio retained Public after refresh. Signed-in playback progressed; independent signed-out playback remains to be verified. The local source is 164.45 seconds, below three minutes. The original edition remains public at https://youtu.be/MR2rbJVQxB8.
 - Primary track: Alexa+.
 - Mini challenges: none for this version.
 - Product feedback: use `product-feedback.md`, reviewing its evidence labels.
-- Entrant/team, eligibility, ownership and legal declarations: owner must complete personally.
-- Final Devpost submission and receipt: not completed.
+- Entrant and eligibility fields were populated on the fresh saved-page readback. Their values and the eligibility declarations were not supplied or checked by the coding assistant. Organizer eligibility approval has not been established.
+- Final Devpost status: Submitted, verified both on the entry workflow and official My projects listing on October 4. No separate email receipt was inspected, and no judging score is available.
 
 This wording describes the current prototype. It makes no claim of official Alexa+ integration, live service orchestration, user validation, or production readiness. AI coding assistance was used in implementation and documentation; the owner should review and be able to explain the work before making originality/ownership declarations.
