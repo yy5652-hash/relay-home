@@ -1,6 +1,6 @@
 # Submission copy and verified status
 
-Status: Devpost entry 1216490 was verified **Submitted**, with **5/5 steps done**, on October 4, 2026. The official My projects listing independently confirmed Submitted for [Relay Home](https://devpost.com/software/relay-home). Primary track: **Alexa+**, working self-hosted MCP server with an independent web simulator. Neither AWS Builder nor Open Source is selected for the current prototype. Reviewer access to the private GitHub repository remains unresolved; submission is not evidence of that access or of judging success.
+Status: Devpost entry 1216490 was verified **Submitted**, with **5/5 steps done**, on October 4, 2026. The official My projects listing independently confirmed Submitted for [Relay Home](https://devpost.com/software/relay-home). Primary track: **Alexa+**, working self-hosted MCP server with an independent web simulator. Neither AWS Builder nor Open Source is selected for the current prototype. Seven authorized reviewer read/write invitations are pending acceptance; submission and sent invitations are not evidence of accepted repository access or judging success.
 
 ## Project name
 
@@ -64,8 +64,8 @@ JavaScript, Node.js, Express, Zod, Model Context Protocol, HTML, CSS, Node test 
 
 ## Submission fields and remaining gates
 
-- GitHub repository URL: https://github.com/yy5652-hash/relay-home (private; October 4 access settings showed zero collaborators and no invitations).
-- The owner authorized creating this private repository and uploading the reviewed project, and separately authorized public video publication. The coding assistant did not click the final Devpost Submit project button; its later read-only verification found the entry Submitted. Reviewer invitations remain unauthorized and have not been sent by this task.
+- GitHub repository URL: https://github.com/yy5652-hash/relay-home (private; refreshed October 4 access settings show seven pending invitations and zero accepted collaborators).
+- The owner authorized creating this private repository and uploading the reviewed project, and separately authorized public video publication. The coding assistant did not click the final Devpost Submit project button; its later read-only verification found the entry Submitted. The owner subsequently explicitly authorized reviewer read/write access while keeping the repository private. This task sent invitations to devposttesting (GitHub's result for testing@devpost.com), chris-trag, knmeiss, giolaq, anishamalde, mosesroth and emersonsklar; all seven remain Pending Invite in the refreshed access page.
 - Current public demo video: https://youtu.be/avoHrgCZtCM — Heart edition published October 3, 2026 with Kokoro synthetic English narration, burned-in captions and uploaded timed English SRT. YouTube Studio retained Public after refresh. Signed-in playback progressed; independent signed-out playback remains to be verified. The local source is 164.45 seconds, below three minutes. The original edition remains public at https://youtu.be/MR2rbJVQxB8.
 - Primary track: Alexa+.
 - Mini challenges: none for this version.
