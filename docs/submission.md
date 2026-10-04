@@ -66,7 +66,7 @@ JavaScript, Node.js, Express, Zod, Model Context Protocol, HTML, CSS, Node test 
 
 - GitHub repository URL: https://github.com/yy5652-hash/relay-home (private; reviewer access has not been granted or verified).
 - The owner authorized creating this private repository and uploading the reviewed project, and separately authorized public video publication. Reviewer invitations and final competition submission remain unauthorized.
-- Public demo video: https://youtu.be/MR2rbJVQxB8 — published October 3, 2026 with English synthetic narration and uploaded English SRT. YouTube Studio retained Public after refresh. The signed-in watch page plays; independent signed-out playback remains to be verified. The local source is 155.09 seconds.
+- Current public demo video: https://youtu.be/avoHrgCZtCM — Heart edition published October 3, 2026 with Kokoro synthetic English narration, burned-in captions and uploaded timed English SRT. YouTube Studio retained Public after refresh. Signed-in playback progressed; independent signed-out playback remains to be verified. The local source is 164.45 seconds, below three minutes. The original edition remains public at https://youtu.be/MR2rbJVQxB8.
 - Primary track: Alexa+.
 - Mini challenges: none for this version.
 - Product feedback: use `product-feedback.md`, reviewing its evidence labels.
