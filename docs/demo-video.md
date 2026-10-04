@@ -8,7 +8,7 @@
 
 Verification decoded all 3,932 video frames through the end, inspected a ten-scene contact sheet, checked subtitle text coverage and non-overlapping times, and confirmed that the audio packets match the selected Heart preview. A separate unprompted local transcription and two isolated rechecks found no obvious omitted passage; these automatic checks are not a manual listening review.
 
-The owner authorized uploading the new edition publicly and updating this private repository on October 3, 2026. The new YouTube upload is waiting for the owner's action-time confirmation of the upload page's Terms of Service and Community Guidelines. No new public URL is claimed yet. The existing published edition below remains unchanged.
+The owner authorized uploading the new edition publicly and updating this private repository on October 3, 2026, then explicitly confirmed the upload page's Terms of Service and Community Guidelines. The Heart edition is published at https://youtu.be/avoHrgCZtCM. YouTube confirmed publication and English subtitles published; the refreshed channel listing retains Public. The public description discloses synthetic narration and the page carries an AI label. Copyright checks reported no issues at publication time. Signed-in playback progressed past 15 seconds with a 164.501-second transcoded duration; independent signed-out playback remains unverified. The existing published edition below remains unchanged.
 
 ## Retained original edition
 
