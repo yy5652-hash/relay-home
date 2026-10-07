@@ -1,134 +1,83 @@
 1
-00:00:00,000 --> 00:00:04,437
-This is Relay Home, a working
-household planning prototype for the Alexa
+00:00:01,246 --> 00:00:07,312
+It is 4:40. School has just moved Mia's pickup to 5:15, and Alex's train is late.
 
 2
-00:00:04,437 --> 00:00:09,244
-plus track. A school pickup changes, a
-train runs late, and the whole
+00:00:07,614 --> 00:00:10,916
+Relay Home rebuilds the evening, and asks before it acts.
 
 3
-00:00:09,244 --> 00:00:13,682
-evening needs a new plan. Everything
-shown here uses synthetic household data.
+00:00:12,073 --> 00:00:18,367
+This page stands in for Alexa+. Behind it are a real MCP server and an Agent Skill.
 
 4
-00:00:13,682 --> 00:00:20,364
-The web simulator calls a real, self hosted MCP
-server over Streamable HTTP. It checks household context and
+00:00:19,416 --> 00:00:25,739
+One sentence. The agent reads the household, checks helpers and dinners in parallel, and drafts a plan.
 
 5
-00:00:20,364 --> 00:00:26,675
-previews an evening plan. Jo is approved and can
-arrive fifteen minutes early. The pantry first dinner
+00:00:26,040 --> 00:00:30,032
+Every card on screen is an MCP Apps view, served by the server.
 
 6
-00:00:26,675 --> 00:00:33,357
-needs three dollars and twenty cents in additions. The
-interface shows the actual tool calls and their timings.
+00:00:31,458 --> 00:00:37,663
+Sam would be five minutes late. Lee lives closer, but is not on the school's list. Only Jo may be asked.
 
 7
-00:00:33,357 --> 00:00:39,353
-Now I ask for dinner under two dollars,
-in twenty minutes. The planner switches to
+00:00:40,383 --> 00:00:42,857
+Ask for anyone else, and the server refuses.
 
 8
-00:00:39,353 --> 00:00:44,948
-chickpea tomato soup, using only the demo
-pantry. This is a constrained, deterministic planner,
+00:00:45,272 --> 00:00:51,476
+A tap on a card does not act. It goes back through the agent, and the server answers: input required.
 
 9
-00:00:44,948 --> 00:00:50,944
-not a general language model. The MCP tools
-also accept structured constraints from another client.
+00:00:51,777 --> 00:00:53,546
+Say no, and nothing happens.
 
 10
-00:00:50,944 --> 00:00:56,051
-Confirmation saves the local tasks and
-shopping list. Pickup still needs the
+00:00:55,225 --> 00:00:58,470
+Only a yes, bound to this exact action, lets it through.
 
 11
-00:00:56,051 --> 00:01:01,583
-helper's acknowledgment. Relay has not sent a
-message or bought anything. Revision checks,
+00:00:59,694 --> 00:01:04,249
+Jo has been asked. Relay does not call the pickup covered until Jo answers.
 
 12
-00:01:01,583 --> 00:01:06,690
-a ten minute expiry, and duplicate
-protection prevent stale or repeated confirmation.
+00:01:11,643 --> 00:01:17,467
+Dinner needs spinach. The shop returns a signed quote, and Relay asks again, for the exact total.
 
 13
-00:01:06,690 --> 00:01:12,929
-After refreshing the page, the saved plan and
-conversation are still here. Automated integration tests also
+00:01:19,546 --> 00:01:25,713
+The order is placed once, inside the weekly grocery cap. The evening card updates itself through the host.
 
 14
-00:01:12,929 --> 00:01:18,779
-stop and restart the server to verify that
-this state survives beyond the browser session.
+00:01:28,276 --> 00:01:35,271
+The household is remembered between sessions, for this page and for any other MCP client with the same token.
 
 15
-00:01:18,779 --> 00:01:23,851
-Undo restores the previous local tasks,
-preferences and shopping list, and records
+00:01:39,346 --> 00:01:44,462
+And if Jo could not come? The plan stops, and names no one. It will not reach for the neighbour.
 
 16
-00:01:23,851 --> 00:01:28,500
-the change. The assistant cannot press
-confirm on the user's behalf.
+00:01:46,742 --> 00:01:54,691
+Under the hood: twelve tools over Streamable HTTP, on the newest protocol revision, with a fallback for older clients.
 
 17
-00:01:28,500 --> 00:01:34,766
-If Jo is unavailable, no approved helper can make
-pickup on time. Relay explains the blocker and
+00:01:54,993 --> 00:01:58,664
+The rules live in the server, so no model can talk its way past them.
 
 18
-00:01:34,766 --> 00:01:41,031
-removes the confirm action. It does not substitute an
-unapproved neighbor or pretend that pickup is covered.
+00:01:58,965 --> 00:02:07,031
+In this recording a scripted model follows the skill, so every run is the same. Add a key, and a hosted model takes its place.
 
 19
-00:01:41,031 --> 00:01:46,139
-When Sam's meeting ends early, the old
-preview becomes stale. Replanning finds that
+00:02:07,331 --> 00:02:11,597
+Twenty-six tests cover the rules, both protocol revisions, and the agent.
 
 20
-00:01:46,139 --> 00:01:51,640
-a parent can now make pickup. Relay
-is locally runnable, with no paid API
+00:02:12,751 --> 00:02:20,395
+The household and the shop are simulated. The protocol, the confirmations and the cards are real, and run from one command.
 
 21
-00:01:51,640 --> 00:01:56,748
-or device required. This is an independent
-simulation, not a live Alexa integration.
-
-22
-00:01:56,748 --> 00:02:02,407
-If Sam cannot make pickup after the plan
-is saved, the household owner records that
-
-23
-00:02:02,407 --> 00:02:07,689
-response. Relay restores the local plan, excludes
-Sam, and checks other approved helpers through
-
-24
-00:02:07,689 --> 00:02:13,348
-MCP. Jo is proposed, but no message is
-sent and the replacement still needs review.
-
-25
-00:02:13,348 --> 00:02:20,633
-After a fresh page load, I ask what Relay
-remembers. It identifies Jo as a current, unsaved pickup
-
-26
-00:02:20,633 --> 00:02:27,512
-option, and separates that draft from earlier locally saved
-changes. No real caregiver has acknowledged anything. The
-
-27
-00:02:27,512 --> 00:02:34,796
-same context is available to an independent MCP client
-after a server restart. Twenty four automated tests pass.
+00:02:20,797 --> 00:02:24,551
+Relay Home. A changed pickup should not derail the whole evening.

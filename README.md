@@ -1,116 +1,151 @@
 # Relay Home
 
-**Plans change. Home stays together.** A household replanning assistant that connects pickup permissions, calendars, pantry ingredients and a grocery budget through a real MCP server.
+**A changed pickup time should not derail the whole evening.** Relay Home is a household agent for Alexa+ that
+rebuilds an evening after a change of plan: it works out who is allowed and able to collect the child, picks a dinner
+that fits the pantry and the budget, and then asks before it requests anything from a person or spends any money.
 
-Built for the **Alexa+ track** of the Build, Ship, Shape: Amazon Developer Hackathon 2026. The frontend is an independent Alexa+ experience simulation. There is no connection to the gated Alexa+ SDK, an Echo device, Ring, or a live household account.
+It is three things that work together:
 
-## Run in two commands
+- a **self-hosted MCP server** over Streamable HTTP (protocol revision 2026-07-28, and still serving 2025-11-25 clients),
+- an **Agent Skill** that tells an agent how to use it,
+- a **simulated Alexa+ experience** in the browser: a conversation, a screen that shows the server's **MCP Apps** cards,
+  and a panel that lists every MCP call the agent makes.
 
-Prerequisite: Node.js 24 or newer and pnpm 11.25.0. From this directory:
+> **What is real and what is not.** The MCP server, the protocol traffic, the confirmation flow, the cards and the
+> skill are real and run on your machine. The household, the school notice and the shop ("Corner Market") are made
+> up. No message is sent to anyone and no money moves. The Alexa+ preview tools are not open to hackathon
+> participants, so this has **not** been run on Alexa+; the browser page stands in for it, as the hackathon FAQ allows.
 
-```sh
-pnpm install --frozen-lockfile --ignore-scripts
+![The evening card after Jo has confirmed and the groceries are ordered](docs/screenshots/evening-ordered.jpg)
+
+## Run it
+
+Needs Node.js 22 or later and pnpm.
+
+```bash
+pnpm install
 pnpm start
 ```
 
-Open **http://127.0.0.1:4317**. No API key, cloud account, hardware, database setup or usage charge is required. Dependency installation needs internet; the running demo does not make external service calls.
+Open <http://localhost:4317>. No key and no account are needed.
 
-The server binds to loopback only. `PORT=4318 pnpm start` changes its port. `RELAY_DATA_DIR=/absolute/path/to/a-new-folder pnpm start` starts an independent demo household without overwriting the existing one. Run one server process per data directory.
+Then try this, in order:
 
-## Fast judging path
+1. Click **The pickup moved**. Relay reads the household, checks helpers and dinners in parallel, and drafts a plan.
+   Three cards appear on the screen; the panel on the right shows the four MCP calls behind them.
+2. Click **Ask Jo** inside the card. Relay's question comes up as a confirmation sheet. Say **Yes**.
+   The card now reads "Asked · waiting for an answer"; Relay does not call the pickup covered.
+3. Under *The household*, click **Jo says yes** (you are playing Jo). The card changes to "Confirmed".
+4. Click **Pasta, and order it**. Relay prices the missing spinach, asks you to confirm $3.20, and places the order.
+   A receipt card appears and the evening card updates itself.
+5. Ask **What do you remember?**, reload the page, and ask again: the household is kept between sessions.
 
-1. Select **Plan under $8**, then open **Inside the plan** to see actual MCP tool calls and timing. The proposal uses an approved on-time helper and stays unconfirmed.
-2. Request **Plan dinner under $2 in 20 minutes**. Review the changed meal, confirm the local plan, and notice that pickup still awaits a real acknowledgment.
-3. Use **Undo saved plan**. Select **No approved helper available** and replan to see a blocker instead of an unauthorized assignment. For recovery, select **Sam's meeting ends early**, confirm Sam's plan, then record **Sam can't make it**; Jo becomes a new draft requiring approval.
+Other things worth trying: say "No" on a confirmation sheet (nothing happens, and Relay does not ask again);
+"Jo can't make it" (Jo is left out, and with nobody else eligible the plan is blocked and names no one);
+"Keep dinner under $2 and 20 minutes"; "Set the weekly cap to $22" and then try to order.
 
-The browser is a simulator, not an Alexa integration. `pnpm check:mcp` independently discovers and calls the running server's MCP tools.
+Run the tests with `pnpm test` (26 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
+revisions, the agent, the model adapters).
 
-## Try the story
+## Connect your own MCP client
 
-1. A school notice moves pickup to 5:15 PM. Alex's train is delayed; Sam's meeting also creates a conflict.
-2. Click **Plan under $8**. Relay discovers tools and calls them over Streamable HTTP. It recommends asking approved helper Jo, and a 25-minute pantry-first dinner with $3.20 in estimated additions.
-3. Open **Inside the plan** and **Why this works**. Trace durations come from actual calls. Rejected candidates and their reasons are available through **Explain the trade-offs**.
-4. Type **Plan dinner under $2 in 20 minutes**. Relay changes the meal to a zero-addition soup.
-5. **Confirm local plan** saves tasks, preferences and a shopping list. Pickup remains **awaiting acknowledgment**. Nothing is sent or purchased.
-6. Reload the page or restart the server. The saved plan, conversation and activity survive.
-   Ask **What do you remember?** to distinguish an unsaved draft, a stale preview and a saved local plan across sessions.
-7. Click **Undo saved plan**. Previous tasks, preferences and shopping data are restored.
-8. Click **Jo can't make it**, or switch to **No approved helper available**. Relay surfaces a blocker and removes the confirm action. It never substitutes an unapproved neighbor.
-9. Switch to **Sam's meeting ends early** and replan. An on-time parent is preferred to a neighbor. A changed scenario makes old previews stale.
-10. Confirm Sam's local plan, then select **Sam can't make it**. Relay restores the saved plan, marks Sam unavailable for this pickup plan, and suggests Jo for a new review. Calendar free time and pickup availability are labeled separately. This records a reported refusal; the app does not contact Sam or Jo.
+The endpoint is `http://localhost:4317/mcp`. Each visitor gets their own household and a bearer token for it:
 
-The conversation supports a small, explicit grammar: plan/replan, budget (`under $8`), duration (`20 minutes`), named availability (`Jo is unavailable` / `Jo is available`), explanation and recap. It is a deterministic constrained planner, **not an LLM** and not an unrestricted voice assistant. No microphone or speech recognition is included.
-Short follow-ups such as `Jo is available`, `Jo is not available` and `Jo can’t make it` work without adding “replan.” They retain the current valid draft’s budget and cooking-time limit, including after a server restart, and never confirm the replacement automatically.
-Out-of-range or malformed numeric constraints are rejected with a clear prompt to restate them; they are not silently clamped into a different budget or cooking time.
-Explanations label stale, expired and historical plans before describing their trade-offs, so an old answer is not presented as a current proposal.
-
-## MCP: real runtime integration
-
-- Official `@modelcontextprotocol/sdk` 1.31.0, imported and called by both server and simulator client.
-- Endpoint: `http://127.0.0.1:4317/mcp`.
-- Streamable HTTP with stateless JSON responses. HTTP GET/DELETE return 405, as allowed for this mode.
-- A raw integration test explicitly negotiates **2025-11-25**, the version named in the hackathon rules.
-- Tools: `household_context`, `preview_evening`, `explain_plan`.
-- `household_context` returns the latest draft or saved plan alongside current local tasks and shopping. An MCP client can resume after a server restart; omitted preview constraints inherit the latest unexpired draft or saved preferences.
-- A separate MCP client cannot create a competing draft while a local plan is saved; the owner must undo that plan first.
-- Tool schemas validate budgets, durations, helper names and plan IDs.
-- MCP tools can read context and produce drafts. Confirmation is a separate trusted frontend action, not an agent-callable tool.
-
-The local bearer token is generated in `.data/mcp-token` with restrictive permissions. Read it locally when connecting another MCP client; never paste it into a repository or submission. An example runtime check is included:
-
-```sh
-pnpm check:mcp
+```bash
+curl -s -X POST http://localhost:4317/api/session -H 'content-type: application/json' -d '{}'
 ```
 
-With a custom data directory or port, set `RELAY_MCP_TOKEN` and `RELAY_MCP_URL` for that check. The demo does not implement production OAuth or multi-user authorization. Do not expose this local prototype to the internet.
+Use the returned `token` as `Authorization: Bearer <token>`. Any MCP client that speaks Streamable HTTP can list and
+call the tools, for example:
 
-## Architecture
-
-Browser → same-origin chat endpoint → official MCP client → authenticated Streamable HTTP endpoint → tool schemas → constrained planner → atomic local JSON store.
-
-Human review → CSRF-protected confirmation endpoint → revision / expiry / blocker checks → local task and shopping update → append-only activity within the saved state. A reported helper refusal restores the previous local tasks and shopping list, excludes that helper from the next pickup draft and requires a new confirmation.
-
-`src/planner.js` contains constraint evaluation, ranking and reversible transitions. `src/mcp.js` exposes tools. `src/agent.js` orchestrates discovery/context/planning/explanation. `src/store.js` writes to a temporary file and renames it before publishing new state in memory. `src/server.js` provides local HTTP boundaries and the UI. `public/` contains a responsive, dependency-free frontend.
-
-Preview validity is ten minutes of real elapsed time. Household schedule evaluation uses a fixed synthetic demo clock at 4:40 PM on October 2, 2026; the UI labels it explicitly. A scenario update increments the household revision and invalidates old drafts. Duplicate confirmation does not duplicate tasks. Undo refuses to overwrite intervening changes.
-After a draft expires, a new chat request starts from saved household preferences rather than silently reusing draft-only budget or helper exclusions; the user can restate either constraint.
-
-## Verification
-
-```sh
-pnpm test
+```bash
+curl -s -X POST http://localhost:4317/mcp \
+  -H "authorization: Bearer $TOKEN" -H 'content-type: application/json' \
+  -H 'accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_household","arguments":{}}}'
 ```
 
-24 tests cover constraints, unavailable helpers, meal budgeting, parent preference, expiry and draft-constraint reset, stale revisions, idempotency, undo and helper-refusal recovery, atomic write failures, corrupt-state preservation, MCP discovery and version negotiation, input validation, Host/Origin checks, token enforcement, cross-session MCP draft recovery and accurate draft/saved/stale recaps. Tests create isolated temporary households and bind ephemeral loopback ports.
+## The tools
 
-Manual browser checks cover preview, confirmation, reload, undo, helper-refusal replanning, blocked planning, real tool traces and a 390-pixel mobile viewport. See `docs/validation.md` and `docs/screenshots/`.
+| Tool | What it does | Changes anything? | Card |
+|---|---|---|---|
+| `get_household` | The notice, the pickup list, dinner slot, pantry, memory, open requests, orders | no | |
+| `find_pickup_helpers` | Checks every adult against the school list, their calendar and travel time, with reasons | no | helpers |
+| `suggest_dinners` | Ranks meals by pantry coverage within time, diet and what is left of the weekly cap | no | dinners |
+| `draft_evening_plan` | Puts pickup and dinner into one stored draft | draft only | evening |
+| `ask_helper` | Records a pickup request to an eligible person | **needs a yes** | evening |
+| `record_helper_reply` | Stores the helper's answer; a "no" removes them from today's plans | yes | evening |
+| `withdraw_pickup_request` | Takes back an unanswered request | yes | evening |
+| `quote_groceries` | Prices the missing items; returns a signed ten-minute quote | no | |
+| `place_grocery_order` | Buys exactly the quoted items | **needs a yes** | receipt |
+| `cancel_grocery_order` | Cancels an order and returns the amount to the cap | yes | receipt |
+| `update_preferences` | Changes the diet preference or the weekly grocery cap | yes | |
+| `confirm_action` | Redeems a confirmation ticket (for clients that cannot be asked directly) | **needs a ticket** | |
 
-## Honest scope and limits
+## How the parts work
 
-- Every person, location, calendar entry, pantry portion, travel duration and price is synthetic.
-- No live calendar, school, shopping, message, device, Alexa or AWS integration is claimed.
-- No message to Jo is sent. A local assignment does not establish real-world pickup coverage.
-- Pantry quantities represent a demo meal portion; stock and dietary suitability are not independently verified.
-- Travel and ingredient availability are assumptions, not live estimates or guaranteed purchases.
-- The planner is a bounded prototype, not a safety, medical or emergency system.
-- No user interviews, deployment, adoption numbers, official score or award are claimed.
-- The data store supports one local household and one server process. Deployment would need authentication, authorization, migrations and concurrency handling.
+**Rules live in the server, not in the model.** Only someone on the school pickup list who can arrive in time may be
+asked. With nobody eligible the plan is blocked and names no one. A pickup is "awaiting reply" until the helper
+answers. An order must match a quote the server signed (HMAC), for the exact total, within the weekly cap, and a
+repeated call with the same `orderKey` returns the same order instead of buying twice. An agent that ignores the skill
+still cannot get past these; `test/` exercises each of them.
 
-## Submission status
+![Relay asks before it acts](docs/screenshots/confirmation.jpg)
 
-The owner-selected Heart narration edition is published at https://youtu.be/avoHrgCZtCM and available as `docs/relay-home-heart.mp4` (164.45 seconds), with aligned English captions in `docs/relay-home-heart.srt` and generation details in `docs/narration-provenance.json`. The original local video and its public link, https://youtu.be/MR2rbJVQxB8, are retained unchanged.
+**Confirmation happens inside the protocol.** `ask_helper` and `place_grocery_order` first answer `input_required`
+with a question for the person (the multi-round-trip pattern of the 2026-07-28 revision). The client shows the
+question, and the retried call carries the answer together with the state the server sealed, so a yes cannot be
+replayed for a different action. An answer that is not a yes ends the call with `done: false`. A 2025-11-25 client on
+a stateless connection cannot be asked this way, so it receives a sealed five-minute ticket and redeems it with
+`confirm_action` after the person agrees. Both paths run the same code once confirmed. See `src/mcp/server.js`.
 
-Local runnable prototype and materials are prepared. The owner authorized the private repository at https://github.com/yy5652-hash/relay-home and separately authorized the [current public demonstration video](https://youtu.be/avoHrgCZtCM), published October 3, 2026 with English subtitles after action-time confirmation of the upload terms. YouTube Studio confirmed publication and retained Public after refresh. Signed-in playback progressed; independent signed-out playback is not yet verified. On October 4, a fresh Devpost project page showed Submitted and 5/5 steps done, independently confirmed by the official My projects listing for entry 1216490, [Relay Home](https://devpost.com/software/relay-home). This verifies submission, not organizer eligibility approval, a judging score or reviewer repository access. Following explicit owner authorization, seven reviewer collaborator invitations were sent on October 4. A refreshed GitHub access page confirms the repository remains private, with seven pending invitations and zero accepted collaborators; sending invitations does not establish accepted access. See `docs/submission.md` for entry copy and remaining access requirements, `docs/product-feedback.md` for observed feedback and `docs/publication-copy.md` for video publication details.
+**Cards are MCP Apps views.** Tools point at `ui://relay-home/*.html` resources. The simulator page is a real MCP Apps
+host: it reads the resource from the server, puts it in a sandboxed frame, and talks to it through `AppBridge`.
+A tap on a card does not act; it sends a message into the conversation, so every action still goes through the agent
+and the confirmation. The evening card reads the household through the host every few seconds (read-only tools only),
+which is how it shows "Confirmed" or "Ordered" without a new card. See `web/view.js`, `web/host.js`, `src/mcp/views.js`.
 
-No open-source license has been selected by the owner; the source repository remains private. The owner has authorized read/write collaborator access for the specified reviewers, and all seven invitations have been sent. Accepted access remains unverified while those invitations are pending. Submission on Devpost does not grant access to GitHub automatically. The submitted version does not enter the Open Source or AWS Builder mini challenge.
+**The agent follows an Agent Skill.** `skills/relay-home-evening/` is a skill in the agentskills.io layout
+(`SKILL.md` with front matter, plus references). The simulator's agent loads it as its instructions and reaches the
+household only through the MCP endpoint, over HTTP, with the visitor's own token. See `src/agent/`.
 
-## Sources
+**Which model drives the agent.** By default a small scripted model follows the skill, so the project runs without a
+key and behaves the same every time. Set `GEMINI_API_KEY`, or `LLM_API_KEY` + `LLM_BASE_URL` + `LLM_MODEL` for any
+OpenAI-compatible service, and a hosted model takes its place with the same skill and tools (see `.env.example`).
+If the hosted model does not answer, the scripted one takes that turn and the page says so. The two adapters are
+tested against each service's wire format with a stand-in for the network; see "Limits" below.
 
-- [Official rules](https://amazonappdev2026.devpost.com/rules), checked October 2, 2026.
-- [Official FAQ](https://amazonappdev2026.devpost.com/details/faqs), including local-run judging and gated Alexa+ tools.
-- [Organizer update on judging](https://amazonappdev2026.devpost.com/updates/46456-got-an-idea), emphasizing workflows and context across sessions for Alexa+.
-- [MCP 2025-11-25 transports](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports).
-- [Official TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk/tree/v1.x).
-- [Federal Reserve 2024 household survey: care work and living arrangements](https://www.federalreserve.gov/publications/2025-economic-well-being-of-us-households-in-2024-care-work-and-living-arrangements.htm), used only as external need context, not product-validation evidence.
+**State across sessions.** Each household is one JSON file under `.data/`, written atomically. The token is the
+sealed household id; the page keeps it in the browser, so a reload or a second MCP client sees the same evening.
 
-Dependency licenses remain the property of their respective authors. Original interface artwork is made from CSS and text; no external photos, music or Amazon logos are bundled.
+## Layout
+
+```
+src/domain/     the household, the planner, the actions and their rules, the store
+src/mcp/        the MCP server (12 tools) and the ui:// views
+src/agent/      the agent loop, the skill loader, the scripted model, the hosted-model adapters
+src/http.js     /mcp behind bearer auth, the chat stream, the endpoints the page uses
+skills/         the Agent Skill
+web/            source of the card code and of the page's host code (bundled by `pnpm build`)
+public/         the simulator page
+test/           26 tests
+docs/           product feedback and friction log, submission text
+```
+
+`dist/view.js` and `public/host.js` are build outputs that are committed, so running needs no build step.
+
+## Limits
+
+- Not run on Alexa+. Whether Alexa+ renders MCP Apps views, answers `input_required`, or loads this skill the way the
+  simulator does is unknown to us.
+- The household, calendar, travel times, shop and prices are fixed demo data. No calendar, messaging or shop service
+  is connected, and Relay never contacts the helper; someone has to tell it what the helper answered.
+- The scripted model understands a limited set of sentences. The hosted-model adapters have been checked against the
+  wire format only, not against the live services.
+- The bearer token is a signed household id for a demo, not an OAuth flow. Do not put real personal data in it.
+- No user research: nobody outside the project has tried it, and no time saving has been measured.
+
+## Licence
+
+MIT. Dependencies: the MCP TypeScript SDK packages and `@modelcontextprotocol/ext-apps` (MIT), Express (MIT), Zod (MIT).
+AI coding assistance was used to write this project.

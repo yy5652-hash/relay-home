@@ -1,38 +1,59 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f6f3ec">
-  <title>Relay Home · Make room for your evening</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script src="/app.js" type="module"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay Home</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <a class="skip" href="#main">Skip to evening plan</a>
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Household navigation">
-      <a class="brand" href="/" aria-label="Relay Home"><span class="brand-mark">r<span>↗</span></span><span>relay<span class="brand-home">home</span></span></a>
-      <div class="household"><span class="house-icon">⌂</span><div><strong>The demo household</strong><small>Alex, Sam & Mia</small></div></div>
-      <nav><a href="#main" class="nav-link active"><span>◷</span> This evening <span class="nav-dot"></span></a><a href="#people-section" class="nav-link"><span>◎</span> Your people</a><a href="#activity-section" class="nav-link"><span>↶</span> Activity & memory</a></nav>
-      <div class="sidebar-bottom"><div class="local-indicator"><i></i> Kept on this device</div><p>A little less coordinating.<br>A little more being home.</p><div class="profile"><span class="avatar peach">A</span><div><strong>Alex</strong><small>Demo household owner</small></div></div></div>
-    </aside>
-    <main id="main">
-      <header class="topbar"><span>YOUR HOME, IN SYNC</span><span class="demo-badge">Alexa+ experience simulation</span></header>
-      <section class="intro"><div><div class="eyebrow">FRIDAY, OCTOBER 2 · DEMO CLOCK 4:40 PM</div><h1>Plans change.<br>Home stays together.</h1><p>One small change can ripple through your evening.<br>Let’s work out the next steps, together.</p></div><div class="orbit-art" aria-hidden="true"><div class="orbit one"></div><div class="orbit two"></div><span class="orbit-house">⌂</span><span class="orbit-label label-one">pickup</span><span class="orbit-label label-two">dinner</span><span class="orbit-dot"></span></div></section>
-      <div class="main-grid">
-        <div class="overview-column">
-          <section class="notice" aria-labelledby="notice-title"><div class="notice-icon">☂</div><div><div class="eyebrow">A CHANGE TO YOUR EVENING</div><h2 id="notice-title">Practice moved indoors. Earlier pickup.</h2><p id="notice-detail">Mia needs pickup at 5:15. Alex’s train arrives at 6:10.</p><div class="source-pill">SYNTHETIC SCHOOL NOTICE + CALENDAR</div></div></section>
-          <section class="plan-section" aria-labelledby="plan-heading"><div class="section-heading"><h2 id="plan-heading">Your evening, reconnected</h2><span id="plan-status" class="tag">Ready to plan</span></div><div id="plan-content" class="plan-content"><div class="empty-plan"><div class="empty-symbol">↗</div><h3>A clear plan starts here.</h3><p>Check who can make pickup, what’s in the pantry,<br>and how dinner fits around it all.</p><button id="start-plan" class="primary">Find a way through <span>↗</span></button><small>Nothing changes until you confirm.</small></div></div></section>
-          <section class="people-section" id="people-section"><div class="section-heading"><h2>Your people</h2><span class="muted-label">DEMO AVAILABILITY</span></div><div id="people" class="people-grid"></div></section>
-          <section class="pantry-section"><div class="section-heading"><h2>Already in the pantry</h2><span class="muted-label">DEMO PORTIONS</span></div><div id="pantry" class="pantry-items"></div></section>
-          <section id="activity-section" class="activity-section"><div class="section-heading"><h2>Activity & memory</h2><span class="muted-label" id="revision">REVISION 1</span></div><div id="activity"><p class="quiet">Your saved changes will appear here and survive a restart.</p></div></section>
-        </div>
-        <aside class="assistant-panel" aria-label="Relay assistant"><div class="assistant-heading"><span class="spark">✳</span><div><h2>A little help from Relay</h2><span><i></i> Local MCP ready</span></div><span class="small-ring">◎</span></div><div class="assistant-description">Plans with context. You stay in control.</div><div id="messages" class="messages" role="log" aria-label="Conversation" aria-live="polite"><div class="message assistant"><span class="message-label">RELAY</span><p>Looks like this evening needs a little reshuffling. I can check pickup options and find a pantry-first dinner.</p><p>What should we work around?</p></div></div><div class="suggestions"><button data-prompt="Plan our evening under $8">Plan under $8 <span>↗</span></button><button data-prompt="Jo is unavailable, replan">Jo can’t make it <span>↗</span></button><button data-prompt="Why did you choose this plan?">Explain the trade-offs <span>↗</span></button></div><form id="chat-form"><label for="message" class="sr-only">Ask Relay about your evening</label><div class="input-row"><input id="message" name="message" placeholder="Try ‘dinner in 20 minutes’…" autocomplete="off" maxlength="1000" required><button type="submit" id="send" aria-label="Send message">↑</button></div></form><div class="assistant-footer">Constrained planner · synthetic data · no live Alexa connection</div><details class="trace-panel"><summary>Inside the plan <span>Actual MCP calls</span></summary><div id="trace"><p class="quiet">Tool calls appear after your first request.</p></div></details></aside>
-      </div>
-      <footer class="demo-controls"><div><strong>Explore a different evening</strong><p>Switching scenarios invalidates old previews.</p></div><label for="scenario" class="sr-only">Demo scenario</label><select id="scenario"><option value="rain">Rain + delayed train</option><option value="no-helper">No approved helper available</option><option value="early-sam">Sam’s meeting ends early</option></select><span class="footer-note">Built for the Amazon Developer Hackathon · Independent prototype</span></footer>
-    </main>
+<header class="top">
+  <div>
+    <h1>Relay Home</h1>
+    <p>A simulated Alexa+ experience. The household, the school and the shop are made up; the MCP server, the Agent Skill and the cards are real.</p>
   </div>
-  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <div class="facts">
+    <span id="protocol" title="Negotiated protocol revision">MCP</span>
+    <span id="model" title="What drives the agent">agent</span>
+    <span id="skill" title="Agent Skill loaded">skill</span>
+    <button id="reset" type="button">Start over</button>
+  </div>
+</header>
+<main>
+  <section class="pane" aria-label="Conversation">
+    <p class="notice"><strong>4:40 PM</strong> <span id="notice"></span></p>
+    <div id="talk" class="talk" aria-live="polite"></div>
+    <div class="chips">
+      <button type="button" data-say="School moved Mia's pickup to 5:15 and Alex's train is late. Keep dinner under $8.">The pickup moved</button>
+      <button type="button" data-say="Make the pasta and order what we need.">Pasta, and order it</button>
+      <button type="button" data-say="What do you remember?">What do you remember?</button>
+    </div>
+    <form id="form" class="composer">
+      <button id="mic" type="button" aria-label="Speak">●</button>
+      <input id="say" autocomplete="off" placeholder="Say something to Relay" aria-label="Message">
+      <button type="submit">Send</button>
+      <label class="voice"><input id="voice" type="checkbox"> Read answers aloud</label>
+    </form>
+  </section>
+  <section class="pane screen" aria-label="On screen">
+    <h2>On screen</h2>
+    <div id="screen"><p class="empty quiet">Relay's cards appear here. Each one is an MCP Apps view delivered by the server as a <code>ui://</code> resource and shown in a sandboxed frame.</p></div>
+  </section>
+  <aside class="pane" aria-label="Inside the plan">
+    <h2>Inside the plan</h2>
+    <p class="quiet">Every call the agent makes to the MCP server at <code id="endpoint"></code>.</p>
+    <ol id="trace" class="trace"></ol>
+    <h2>The household</h2>
+    <div id="home"></div>
+  </aside>
+</main>
+<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="question">
+  <div class="sheet-box">
+    <p class="quiet">Relay needs your yes before it does this</p>
+    <p id="question" class="question"></p>
+    <div class="sheet-actions"><button id="no" type="button">No</button><button id="yes" type="button" class="primary">Yes</button></div>
+  </div>
+</div>
+<script type="module" src="host.js"></script>
 </body>
 </html>

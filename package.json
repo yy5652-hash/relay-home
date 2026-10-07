@@ -1,11 +1,29 @@
 {
   "name": "relay-home",
-  "version": "0.1.0",
-  "packageManager": "pnpm@11.25.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "A consent-first household replanning assistant with a real Streamable HTTP MCP server.",
-  "engines": { "node": ">=24" },
-  "scripts": { "start": "node src/server.js", "test": "node --test", "check:mcp": "node scripts/check-mcp.js" },
-  "dependencies": { "@modelcontextprotocol/sdk": "1.31.0", "express": "5.1.0", "zod": "3.25.76" }
+  "description": "Relay Home: a consent-first household agent for Alexa+. A Streamable HTTP MCP server with MCP Apps views, an Agent Skill and a simulated Alexa+ host.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "build": "node scripts/build.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
+    "@modelcontextprotocol/express": "2.0.2",
+    "@modelcontextprotocol/ext-apps": "2.0.3",
+    "@modelcontextprotocol/node": "2.1.1",
+    "@modelcontextprotocol/server": "2.3.1",
+    "express": "5.2.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "author": "Yi Yu"
 }

@@ -1,21 +1,40 @@
-# Demonstration video versions
+# Demo video
 
-## Current Heart narration edition
+Length 2:27, 1920x1080, English, burned-in captions, with a matching `.srt`.
 
-`relay-home-heart.mp4` is a **164.45-second** H.264/AAC video at 1280 × 880 with English Kokoro `af_heart` synthetic narration. All ten clips were generated through the official Kokoro Hugging Face demo in Chrome, using its free CPU route at speed 1. No paid subscription or API was used. Narration provenance is recorded in `narration-provenance.json`; the model's license does not change the source-code license of this project.
+**What is on screen.** After the opening card, everything is a recording of this repository's simulator page running
+against its own MCP server on the same machine (`pnpm start`), driven by a script that clicks and types the way a
+person would. Nothing is mocked for the film: the cards, the confirmation sheets, the list of MCP calls and their
+timings are what the page showed. The agent in the recording is the built-in scripted model, as the film says. The
+"under the hood" and closing cards are drawn over the page.
 
-`relay-home-heart.srt` contains 56 cues covering all 379 script words. Timing uses automatic known-script word alignment, not the original proportional estimate. The video burns the captions into the existing footer without covering the captured application UI. The SRT remains available for accessibility and editing.
+**How it was made.** A headless Chromium plays a step list (say this sentence, click this, move the camera there).
+The picture is the browser's own screencast, placed on a 30 fps timeline by frame timestamps; the camera moves are
+CSS transforms of the page. The narration is a synthetic voice (Kokoro, Apache-2.0). The quiet bed under the voice is
+synthesised from oscillators and noise by our own script; no existing recording, sample or melody is used.
 
-Verification decoded all 3,932 video frames through the end, inspected a ten-scene contact sheet, checked subtitle text coverage and non-overlapping times, and confirmed that the audio packets match the selected Heart preview. A separate unprompted local transcription and two isolated rechecks found no obvious omitted passage; these automatic checks are not a manual listening review.
+## Narration
 
-The owner authorized uploading the new edition publicly and updating this private repository on October 3, 2026, then explicitly confirmed the upload page's Terms of Service and Community Guidelines. The Heart edition is published at https://youtu.be/avoHrgCZtCM. YouTube confirmed publication and English subtitles published; the refreshed channel listing retains Public. The public description discloses synthetic narration and the page carries an AI label. Copyright checks reported no issues at publication time. Signed-in playback progressed past 15 seconds with a 164.501-second transcoded duration; independent signed-out playback remains unverified. The existing published edition below remains unchanged.
-
-## Retained original edition
-
-`relay-home-demo.mp4` is a **155.09-second** H.264/AAC video at 1280 × 880 with English macOS Samantha synthetic narration. `relay-home-demo.srt` provides approximate paced captions for the same narration.
-
-The video uses actual Chrome screencast frames and held end-state screenshots from one clean, isolated synthetic household run. It follows the interaction sequence from the initial blank plan through replanning after a reported refusal and a later page reload with a memory query. It is edited for narration pacing; it is not an uninterrupted real-time recording. No product state was drawn into or altered inside the captured screenshots.
-
-It shows the changed pickup, actual MCP calls, a tighter budget, confirmation, refresh recovery, undo, blocked pickup, replanning after a calendar update and a reported helper refusal that produces a new draft. The final scene shows a subsequent page reload and a memory answer that distinguishes the unsaved draft from earlier local changes. All household data is synthetic. The recording makes no claim of live Alexa/device integration or real messages sent.
-
-The complete original video was decoded for validation, including 3,706 video frames through the final second; all ten narration clips contain audio, and a 16-frame contact sheet includes the final scene. Its SRT has 27 balanced two-line cues lasting 4.44–7.28 seconds each. It was published with the owner's authorization on October 3, 2026 at https://youtu.be/MR2rbJVQxB8. YouTube Studio retained Public after refresh; independent signed-out playback remains unverified. The competition requires a public YouTube or Vimeo link; a local MP4 alone is insufficient. Publication details and owner checks are in `publication-copy.md`.
+| At | Caption |
+|---|---|
+| 0:01.2 | It is 4:40. School has just moved Mia's pickup to 5:15, and Alex's train is late. |
+| 0:07.6 | Relay Home rebuilds the evening, and asks before it acts. |
+| 0:12.1 | This page stands in for Alexa+. Behind it are a real MCP server and an Agent Skill. |
+| 0:19.4 | One sentence. The agent reads the household, checks helpers and dinners in parallel, and drafts a plan. |
+| 0:26.0 | Every card on screen is an MCP Apps view, served by the server. |
+| 0:31.5 | Sam would be five minutes late. Lee lives closer, but is not on the school's list. Only Jo may be asked. |
+| 0:40.4 | Ask for anyone else, and the server refuses. |
+| 0:45.3 | A tap on a card does not act. It goes back through the agent, and the server answers: input required. |
+| 0:51.8 | Say no, and nothing happens. |
+| 0:55.2 | Only a yes, bound to this exact action, lets it through. |
+| 0:59.7 | Jo has been asked. Relay does not call the pickup covered until Jo answers. |
+| 1:11.6 | Dinner needs spinach. The shop returns a signed quote, and Relay asks again, for the exact total. |
+| 1:19.5 | The order is placed once, inside the weekly grocery cap. The evening card updates itself through the host. |
+| 1:28.3 | The household is remembered between sessions, for this page and for any other MCP client with the same token. |
+| 1:39.3 | And if Jo could not come? The plan stops, and names no one. It will not reach for the neighbour. |
+| 1:46.7 | Under the hood: twelve tools over Streamable HTTP, on the newest protocol revision, with a fallback for older clients. |
+| 1:55.0 | The rules live in the server, so no model can talk its way past them. |
+| 1:59.0 | In this recording a scripted model follows the skill, so every run is the same. Add a key, and a hosted model takes its place. |
+| 2:07.3 | Twenty-six tests cover the rules, both protocol revisions, and the agent. |
+| 2:12.8 | The household and the shop are simulated. The protocol, the confirmations and the cards are real, and run from one command. |
+| 2:20.8 | Relay Home. A changed pickup should not derail the whole evening. |

@@ -1,76 +1,91 @@
-# Submission copy and verified status
+# Submission text (Relay Home 2.0)
 
-Status: Devpost entry 1216490 was verified **Submitted**, with **5/5 steps done**, on October 4, 2026. The official My projects listing independently confirmed Submitted for [Relay Home](https://devpost.com/software/relay-home). Primary track: **Alexa+**, working self-hosted MCP server with an independent web simulator. Neither AWS Builder nor Open Source is selected for the current prototype. Seven authorized reviewer read/write invitations are pending acceptance; submission and sent invitations are not evidence of accepted repository access or judging success.
-
-## Project name
-
-Relay Home
+Track: **Alexa+** (self-hosted MCP server and Agent Skill, shown through a simulated Alexa+ experience).
 
 ## Tagline
 
-A changed pickup time should not derail the whole evening. Relay reconnects the plan, explains the trade-offs, and waits for your say-so.
+A changed pickup time should not derail the whole evening. Relay rebuilds the plan, shows it, and asks before it acts.
 
 ## Inspiration
 
-A family schedule is a chain of small dependencies. If school pickup changes, a parent's calendar, another caregiver's availability, dinner preparation and grocery needs can change with it. A reminder can identify the problem without helping a household work through it.
-
-Relay explores a conversational household workflow that converts a disruption into a reviewable plan. The prototype focuses on one concrete evening so the decisions, constraints and failure cases can be inspected rather than hidden behind a broad assistant promise.
+A family evening is a chain of small dependencies. School moves a pickup by 45 minutes and suddenly it matters who is
+on the school's pickup list, whose train is late, what is in the pantry and how much of the week's grocery money is
+left. A reminder tells you there is a problem. We wanted an assistant that works the problem, and that a parent could
+trust with two things assistants usually should not do on their own: asking another adult to collect a child, and
+spending money.
 
 ## What it does
 
-Relay combines a synthetic calendar, an approved pickup list, pantry portions and a grocery budget. It checks who can arrive on time, explains why other candidates do not work, and pairs the pickup proposal with a pantry-first dinner. A smaller budget or shorter cooking window changes the meal. If no approved person can make pickup, the plan stays blocked. If a helper later declines, the owner can record that response and review a new proposal that excludes that helper.
+You tell Relay what changed. It reads the household, checks in parallel who may collect the child and which dinners
+fit, and drafts one plan. On a screen it shows that plan as cards: who can be asked and why the others cannot, the
+dinner options with what is already at home, the evening at a glance.
 
-This is a multi-step, stateful workflow rather than a single-turn answer. A budget change replans dinner without losing pickup context; a helper's reported refusal reopens the saved plan and excludes that helper; the conversation and local plan survive an app restart. Asking what Relay remembers distinguishes an unsaved draft, a stale preview and a saved local plan. Every proposed action remains a draft until the user confirms it. Confirmation saves local tasks and a shopping list, while pickup remains awaiting a real helper's acknowledgment. Undo restores the previous local state. No message, purchase or device command is sent by this prototype.
+Then it asks. "Ask Jo to collect Mia at Oakfield School, main gate by 5:15 PM?" Only a yes sends the request, and the
+pickup stays "awaiting reply" until Jo answers; Relay never calls it covered before that. If dinner needs something,
+Relay gets a price from the shop, asks you to confirm the exact total, and places the order once, inside the weekly
+grocery cap you set. Say no and nothing happens. If the helper declines and nobody else on the school list can make
+it, the plan stops and names no one; it will not suggest the neighbour who lives closer but is not on the list.
 
-In the demo's 5:15 PM pickup scenario, approved helper Jo can arrive at 5:00; parent Sam arrives five minutes late, and faster neighbor Lee is not authorized. Relay proposes Jo but does not claim pickup is covered. With an $8 grocery cap it proposes a pantry-first pasta with $3.20 in additions; changing the request to $2 and 20 minutes switches dinner to a zero-addition soup. Removing Jo without changing the calendar produces a blocker, not an unsafe replacement. When Sam's meeting ends early, a new plan prefers the on-time parent; recording Sam's later refusal restores the local tasks and makes Jo a fresh, unconfirmed proposal. These are synthetic, reproducible outcomes, not field results.
+The household is remembered between sessions, and any MCP client that connects with the same token sees the same
+evening.
 
-## Who it is for and why it matters
-
-The intended user is a household coordinating time-sensitive pickup among parents and already-approved helpers. A changed school pickup is not just another reminder: the proposed person must be authorized and able to arrive by the deadline, while dinner and grocery choices still fit the evening. Relay presents one reviewable response to that chain of constraints instead of leaving the household to reconcile separate messages and lists. If a helper later declines, the owner can record that response and review a replacement without treating the first local assignment as real-world coverage.
-
-As context for this use case, the [Federal Reserve's 2024 household survey](https://www.federalreserve.gov/publications/2025-economic-well-being-of-us-households-in-2024-care-work-and-living-arrangements.htm) found that 46% of U.S. adults living with their own children under 13 used some unpaid childcare, and 6% reported care by a nonrelative such as a friend or neighbor. Those figures show that care networks extend beyond parents; they do not measure last-minute pickup changes, demand for Relay, or benefits from this prototype.
-
-We have not measured household demand or saved time. A credible next validation would recruit consenting households and measure time to a feasible plan, the share of suggestions rejected by policy or availability, how often an accepted helper actually acknowledges pickup, and whether people understand the difference between a draft, a locally saved task and a confirmed real-world arrangement.
+The household, the school notice and the shop are simulated, no message is sent and no money moves. The Alexa+
+preview tools are not open to participants, so this runs in a browser page that stands in for Alexa+, as the FAQ allows.
 
 ## How we built it
 
-The implementation uses Node.js 24, Express, Zod and the official MCP TypeScript SDK. The simulator's server-side client discovers tools and calls `household_context`, `preview_evening` and `explain_plan` over authenticated Streamable HTTP. The context tool exposes the latest draft or saved plan and current local tasks, so another MCP client can resume after a restart. Omitted preview constraints inherit the latest unexpired draft or saved preferences. An integration test negotiates protocol version 2025-11-25 explicitly.
-
-The planner is deterministic: filter pickup candidates by authorization, availability and arrival deadline; prefer a feasible parent over a neighbor; filter meals by dietary preference, cooking time, cook availability and budget; then rank meals by pantry coverage and cost. It is not an LLM. The conversational layer deliberately supports a limited grammar and states that limit.
-
-Drafts carry a household revision and a ten-minute expiry. Confirmation checks both, rejects blockers and is idempotent. State transitions are written atomically before they become visible in memory. MCP cannot invoke confirmation; it stays behind a separate user control.
+- **MCP server** (TypeScript SDK 2.x, Streamable HTTP, stateless, bearer auth): twelve tools. It speaks protocol
+  revision 2026-07-28 and still serves 2025-11-25 clients.
+- **Confirmation inside the protocol.** The two tools that act for the household answer `input_required` with a
+  question; the retried call must carry the person's yes and the state the server sealed, so a yes cannot be replayed
+  for another action. Older clients that cannot be asked get a sealed five-minute ticket and a `confirm_action` tool.
+- **Purchasing with guard rails.** A quote is signed by the server (HMAC) and valid for ten minutes; an order must
+  match it to the cent, fit the weekly cap, and carries an idempotency key so a retry never buys twice. Orders can be
+  cancelled and the amount returns to the cap.
+- **MCP Apps views.** Four `ui://` cards (evening, helpers, dinners, receipt). Our page is a real MCP Apps host: it
+  reads each view from the server, shows it in a sandboxed frame through `AppBridge`, and forwards only read-only
+  tool calls from a card. A tap on a card sends a message into the conversation instead of acting, so every action
+  still passes the agent and the confirmation.
+- **Agent Skill.** `skills/relay-home-evening` (agentskills.io layout) tells an agent the order of work and the rules
+  it must not bend. The simulator's agent loads it and reaches the household only through the MCP endpoint.
+- **Agent.** A small loop that runs independent tool calls in parallel. By default a scripted model follows the
+  skill so the demo runs without a key and is repeatable; adapters for Gemini and any OpenAI-compatible service
+  take its place when a key is set, with the scripted model as a stand-in if the service does not answer.
+- **Rules in the server.** Every rule above is enforced by the server and covered by tests, so an agent that
+  ignores the skill still cannot get past them. 26 tests: the rules, the server in memory, the real HTTP endpoint on
+  both protocol revisions, the agent, the model adapters.
 
 ## Challenges
 
-The official Alexa+ preview tools are unavailable to hackathon participants, so we followed the self-hosted MCP and independent simulator route described in the official FAQ. We made the tool connection visible in the interface and verified it with the SDK client as well as raw protocol negotiation.
+We could not test on Alexa+, so we do not know how it answers `input_required`, renders views or loads a skill. We
+built for both protocol revisions and kept every rule in the server for that reason. The most instructive bug was
+ours: a declined confirmation was asked again eight times, because our handler only recognised a yes. The details
+of this and nine other rough edges are in `docs/product-feedback.md`.
 
-Another challenge was making failure useful. When all approved caregivers are unavailable, choosing a nearby but unauthorized person would produce a convincing-looking yet invalid plan. Relay instead explains the unmet constraint and asks for a human decision.
+## Accomplishments we are proud of
 
-## Accomplishments
-
-A locally runnable end-to-end workflow with visible MCP calls, constrained replanning, explicit review, persistent state, undo and helper-refusal recovery. Twenty-four automated tests pass, including real HTTP/MCP integration, cross-session draft recovery, accurate recaps and rejected unsafe or stale transitions. An extracted copy of the delivery ZIP was installed and tested separately; its UI and independent MCP client also ran on a new loopback port. Manual browser checks verify the desktop workflow, refusal-to-replan path and mobile layout.
+A consent flow that lives in the protocol rather than beside it; cards that keep themselves current without being
+able to change anything; and a server whose rules hold no matter which model is driving.
 
 ## What we learned
 
-A useful household assistant needs more than a fluent answer. It needs a distinction between a proposal and a real-world commitment, a clear explanation of rejected options, and a reliable way to recover from changes. Tool observability also makes a simulator much easier to evaluate and debug.
+For actions on someone's behalf, the useful unit is not "a tool call" but "a question, a yes for exactly that
+question, and one effect". MCP's multi-round-trip requests fit that well. And a household assistant earns trust less
+by what it can do than by what it visibly will not do without asking.
 
 ## What's next
 
-Validate the workflow with consenting households; measure time to repair a schedule disruption; add authorized calendar connectors; replace fixed travel estimates with a documented provider; and add explicit caregiver acknowledgment. Broader natural-language understanding could be added without moving policy checks or confirmation into the model. These are planned improvements, not completed integrations.
+Run it on Alexa+ when the tools are available. Replace the simulated services with real ones behind the same tools:
+a calendar, a messaging channel that lets the helper answer for themselves, a grocery partner. Test it with
+households, and measure whether a changed evening is actually repaired faster.
 
 ## Built with
 
-JavaScript, Node.js, Express, Zod, Model Context Protocol, HTML, CSS, Node test runner.
+Node.js, TypeScript SDK for MCP (server, client, node, express packages), MCP Apps (`@modelcontextprotocol/ext-apps`),
+Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript.
 
-## Submission fields and remaining gates
+## Notes for the form
 
-- GitHub repository URL: https://github.com/yy5652-hash/relay-home (private; refreshed October 4 access settings show seven pending invitations and zero accepted collaborators).
-- The owner authorized creating this private repository and uploading the reviewed project, and separately authorized public video publication. The coding assistant did not click the final Devpost Submit project button; its later read-only verification found the entry Submitted. The owner subsequently explicitly authorized reviewer read/write access while keeping the repository private. This task sent invitations to devposttesting (GitHub's result for testing@devpost.com), chris-trag, knmeiss, giolaq, anishamalde, mosesroth and emersonsklar; all seven remain Pending Invite in the refreshed access page.
-- Current public demo video: https://youtu.be/avoHrgCZtCM — Heart edition published October 3, 2026 with Kokoro synthetic English narration, burned-in captions and uploaded timed English SRT. YouTube Studio retained Public after refresh. Signed-in playback progressed; independent signed-out playback remains to be verified. The local source is 164.45 seconds, below three minutes. The original edition remains public at https://youtu.be/MR2rbJVQxB8.
-- Primary track: Alexa+.
-- Mini challenges: none for this version.
-- Product feedback: use `product-feedback.md`, reviewing its evidence labels.
-- Entrant and eligibility fields were populated on the fresh saved-page readback. Their values and the eligibility declarations were not supplied or checked by the coding assistant. Organizer eligibility approval has not been established.
-- Final Devpost status: Submitted, verified both on the entry workflow and official My projects listing on October 4. No separate email receipt was inspected, and no judging score is available.
-
-This wording describes the current prototype. It makes no claim of official Alexa+ integration, live service orchestration, user validation, or production readiness. AI coding assistance was used in implementation and documentation; the owner should review and be able to explain the work before making originality/ownership declarations.
+- Video: see `docs/demo-video.md`. Product feedback and friction log: `docs/product-feedback.md`.
+- AI coding assistance was used to write this project.
+- Not claimed: an Alexa+ integration, real services, user research, a live run with a hosted model.

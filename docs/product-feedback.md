@@ -1,91 +1,148 @@
 # Product feedback and friction log
 
-Prepared October 2, 2026; updated October 3 after publication of the Heart narration edition. Review before submitting. This is feedback on observed documentation and the tools actually used; it does not claim hands-on testing of gated Alexa+ tooling. Demo-production tools are separated from application runtime dependencies below.
+Written during the build of Relay Home 2.0 (October 2026). Everything below was hit while writing the code in this
+repository; where an item is about documentation rather than behaviour, it says so. We had no access to the Alexa+
+preview tools (Category SDK, MCP Toolkit, Alexa CLI, Web Simulator), so nothing here is hands-on feedback on those;
+the section "What we could not test" lists what that leaves open.
 
-## Tools used and purpose
+## Tools used
 
-- Official MCP TypeScript SDK 1.31.0: real server registration, Streamable HTTP transport, client discovery and tool calls.
-- MCP 2025-11-25 transport specification: protocol-version, response-mode and Origin-check requirements.
-- Express 5.1.0: local HTTP endpoints and static app serving.
-- Zod 3.25.76: tool and endpoint input validation.
-- Node.js 24.19.0 and its test runner: runtime and unit/integration verification.
-- Devpost official rules and FAQ: track selection and judging/submission requirements.
-
-No gated Alexa+ Category SDK, MCP Toolkit, Alexa CLI, Web Simulator, Ring SDK, Bee data, AWS runtime service, or Kiro Crew was used.
-
-The MCP SDK was the track-relevant runtime tool and is the focus of the detailed feedback below. For the supporting tools: Express made local route and static UI setup straightforward; Zod supplied clear input boundaries for tool and HTTP requests; Node's built-in test runner covered domain and real HTTP behavior without another test framework. We observed no product defects in these three supporting tools. They were easy to start with existing documentation and we would use them again for a small local prototype. This is not a claim that we tested their wider feature sets or production behavior.
+| Tool | Version | Used for |
+|---|---|---|
+| MCP TypeScript SDK, split packages (`@modelcontextprotocol/server`, `/client`, `/node`, `/express`) | 2.3.1 / 2.3.1 / 2.1.1 / 2.0.2 | The server, the HTTP endpoint with bearer auth, the agent's client, in-memory tests |
+| MCP specification | 2026-07-28, with 2025-11-25 for older clients | Streamable HTTP, multi-round-trip `input_required`, tool annotations |
+| MCP Apps (`@modelcontextprotocol/ext-apps`) | 2.0.3 (spec 2026-01-26) | `ui://` views, the `App` class inside cards, `AppBridge` in our host page |
+| Agent Skills format (agentskills.io) | as published | `skills/relay-home-evening/` |
+| Express, Zod, esbuild, Node.js test runner | 5.2.1, 4.6.5, 0.28.2, Node 24 | Routing, schemas, browser bundles, tests |
+| Hackathon rules and FAQ | read 2026-10-07 | Track requirements, what a simulated experience may be |
 
 ## What worked well
 
-The official MCP SDK supported a real client/server round trip with a small tool surface. Structured tool results and explicit schemas allowed the same planner to serve both the simulator and an independent test client. Stateless JSON mode kept a local-only demo straightforward. The official FAQ explicitly clarified that local execution plus a demo video is sufficient and that gated Alexa+ preview tools are not necessary.
+- **One handler for two protocol revisions.** `createMcpHandler(factory)` with `toNodeHandler` serves 2026-07-28 and
+  2025-11-25 clients from the same stateless endpoint, and the factory is told which kind of client is calling. That
+  made it possible to keep one set of tools and only branch on how to ask the person.
+- **`input_required` is the right shape for consent.** A tool that needs a yes returns a question and a sealed
+  state; the client answers by retrying the same call. There is no session to keep and nothing to clean up, and the
+  confirmation is tied to one action. It replaced the separate confirm endpoint
+  outside MCP that our first version needed.
+- **MCP Apps separates data from presentation cleanly.** The same tool result feeds the model (text), a program
+  (`structuredContent`) and a person (the view). With `AppBridge`, the part of our page that hosts a card is about fifteen lines.
+- **`InMemoryTransport.createLinkedPair()`** let the whole server be tested without a port, including confirmations.
 
-## What needs work
+## Friction log
 
-The hackathon rules name MCP 2025-11-25, while the SDK repository's main documentation points to a newer SDK/specification line. A pinned, hackathon-specific sample would reduce the effort needed to choose the right package and verify protocol compatibility. We followed the maintained v1 line and wrote an explicit 2025-11-25 negotiation test.
+Each entry: what we were doing, what we expected, what happened, what we did, what would help. We did not time the
+individual problems, so no durations are given.
 
-## Onboarding
+### 1. A declined confirmation is asked again, eight times
+- **Doing:** `place_grocery_order` returns `inputRequired(...)` until the retried call carries an accepted answer.
+- **Expected:** when the person declines, the call ends.
+- **Happened:** our handler only recognised an accepted answer, so on a decline it returned `input_required` again.
+  The client asked the person again, and again, until it gave up with `Multi-round-trip request 'tools/call' still
+  required input after 8 rounds`. A user would have seen the same question eight times.
+- **How it was found:** late, when a test that had been written too loosely was tightened.
+- **Fix:** treat "an answer is present for this exact state, and it is not a yes" as final and return a normal result
+  (`done: false`).
+- **Would help:** the `inputRequired` documentation should show the decline branch next to the accept branch, and
+  `acceptedContent` could have a sibling that returns `accepted | declined | absent` so the three cases are explicit.
+  Severity: high, because the failure is silent on the server and user-facing.
 
-The first dependency lookup failed because the local execution environment blocked network name resolution. Retrying with approved network access resolved installation. The first local HTTP test also encountered a local listener restriction and exposed insufficient error handling in our own server startup. We corrected our startup error handling and ran the HTTP tests with local listener permission. These were environment/application issues, not established MCP or Alexa platform defects.
+### 2. `ctx.mcpReq.requestState` is a function
+- **Doing:** reading back the sealed state on the retried call.
+- **Expected:** a property, like `ctx.mcpReq.inputResponses` next to it.
+- **Happened:** it is a method. Comparing the function to our state never matched, so every retry asked again
+  (the same eight-round loop as above, for a different reason). No error or warning.
+- **Would help:** make the two accessors the same kind of thing, or have TypeScript-less users get a runtime warning
+  when a function is serialised into a comparison. Severity: medium.
+
+### 3. A new client talks the old revision over HTTP unless told otherwise
+- **Doing:** connecting the 2.x client to our own 2.x server over Streamable HTTP.
+- **Expected:** both ends on the newest revision.
+- **Happened:** the client negotiated 2025-11-25. On that revision our `input_required` reply cannot be delivered on
+  a stateless connection, so confirmations failed. The client needs `versionNegotiation: { mode: 'auto' }`.
+- **What made it slow:** nothing pointed at the revision; the symptom was a failed confirmation.
+- **Would help:** log the negotiated revision at connect by default, and say in the client README that the default
+  is the conservative one. Severity: medium.
+
+### 4. No supported way for a stateless server to ask an older client
+- **Doing:** supporting 2025-11-25 clients, which the hackathon rules name as the minimum.
+- **Expected:** some fallback for elicitation.
+- **Happened:** a stateless request on the older revision has no channel for the server to ask anything.
+  We built our own: the tool returns a sealed five-minute ticket and a `confirm_action` tool redeems it.
+- **Would help:** a documented pattern for "confirmation without elicitation", since every action-taking server for
+  a voice assistant needs one. Severity: medium.
+
+### 5. Bearer auth: a thrown `Error` becomes a 500
+- **Doing:** `requireBearerAuth({ verifier })` with our own token check.
+- **Expected:** an invalid token is answered with 401.
+- **Happened:** throwing a plain `Error` from the verifier produced 500; it must be `OAuthError` with
+  `OAuthErrorCode.InvalidToken`. Separately, a verifier result without `expiresAt` is rejected.
+- **Would help:** treat any verifier rejection as `invalid_token` by default; document `expiresAt` as required.
+  Severity: low.
+
+### 6. MCP Apps: package line and bundle size
+- **Doing:** adding `@modelcontextprotocol/ext-apps` to a project on the 1.x SDK.
+- **Expected:** it works with the SDK the hackathon material points to.
+- **Happened:** ext-apps 2.x needs the split 2.x packages and Zod 4, so the server had to move to the new line
+  first. In the browser, the `App` class with its dependencies bundles to about 600 kB minified, and because a view
+  should be self-contained we inline that into each of our four `ui://` documents.
+- **What we did:** rebuilt the server on the 2.x packages; the size we accepted.
+- **Would help:** a dependency-free build of the view-side `App` (it only needs postMessage and a few schemas), and a
+  compatibility table in the README. Severity: medium for size on low-power screens.
+
+### 7. MCP Apps host: tool calls from a view need a server-side proxy
+- **Doing:** letting the evening card refresh itself with `app.callServerTool`.
+- **Expected:** to pass our MCP client to `AppBridge` and be done.
+- **Happened:** our page is in the browser and the MCP client with the bearer token lives on the server, so we
+  constructed the bridge with no client and implemented `oncalltool` ourselves, with an allow-list of read-only
+  tools. The spec leaves it to the host which tools a view may call; we could not find guidance on a safe default.
+- **Would help:** a recommended default (for example: only tools annotated `readOnlyHint`), and a note that several
+  bridges on one page each log "Ignoring message from unknown source" for the other frames' messages. Severity: low.
+
+### 8. Nothing tells a view that its data is stale
+- **Doing:** keeping the evening card correct after a later tool call (an order) changed the state.
+- **Expected:** a notification from host to view that says "the result you are showing has changed".
+- **Happened:** a view only ever gets the result of the call that created it. We poll a read-only tool every three
+  seconds.
+- **Would help:** a host-to-view "refresh" notification, or resource subscriptions surfaced to views. Severity: low.
+
+### 9. Agent Skills: no way to check what a host will do with one
+- **Doing:** writing `SKILL.md` so that an agent uses the tools in the right order and never bends the rules.
+- **Expected:** a way to run a skill against a reference agent, or at least a validator.
+- **Happened:** we wrote our own loader and treat the skill as system instructions. Whether Alexa+ loads the
+  references, how much of the body it reads, and how it resolves a conflict between a skill and a tool description
+  are unknown to us. We therefore put every rule that matters into the server as well.
+- **Would help:** a published checklist of what Alexa+ reads from a skill, and a conformance test. Severity: medium.
+
+### 10. Small things
+- pnpm 11 prints "Ignored build scripts: esbuild" and writes a placeholder into `pnpm-workspace.yaml`
+  (`esbuild: set this to true or false`) that is not valid until edited.
+- Tool annotations have no way to say "this needs the person's confirmation"; we say it in the description and
+  enforce it in the handler. `destructiveHint` is not the same thing.
+
+## What we could not test
+
+The Alexa+ preview tools are not available to hackathon participants. So we do not know: which protocol revision
+Alexa+ speaks to a self-hosted server; whether it answers `input_required` or elicitation by voice, on screen, or not
+at all; whether and how it renders MCP Apps views on Echo Show devices; how it authenticates to a self-hosted
+server on behalf of a household; and how it loads Agent Skills. We built for both protocol revisions and kept
+every rule in the server because of this.
+
+## Feature requests, in order
+
+1. **A public Alexa+ conformance client** (even a command-line one) that connects to a self-hosted MCP server the way
+   Alexa+ does and reports what it would do with each tool, view and confirmation. This would have replaced most of
+   our guessing.
+2. **A first-class confirmation contract**: an annotation for "needs the person's yes", the decline branch in the
+   helpers, and a documented fallback for clients that cannot be asked.
+3. **A version-pinned starter** for the hackathon stack: 2.x server, bearer auth, one tool with a view, one tool with
+   a confirmation, one test for each protocol revision.
+4. **A light view runtime** for MCP Apps and a host-to-view refresh signal.
+5. **Purchasing guidance**: how a self-hosted server should represent a quote, a cap and an idempotent order so that
+   Alexa+ can present them consistently across skills.
 
 ## Would we build with these tools again?
 
-Yes, for the open MCP SDK and independent simulator workflow: the typed tool interface and real transport are useful for inspectable agent actions. We cannot assess the gated Alexa+ SDK firsthand. We would evaluate it when access is available rather than claiming experience with it now.
-
-## Friction log 1 — Track/version onboarding
-
-- Task: select an Alexa+ implementation route matching the hackathon's protocol requirement.
-- Steps: read the rules, official FAQ, SDK main README and maintained v1 Streamable HTTP example.
-- Expected: a single pinned starter aligned with the hackathon requirement.
-- Observed: the rules specify 2025-11-25; SDK main documentation describes a newer major/spec line; gated preview tools are unavailable to participants.
-- Severity: Important, documentation/onboarding friction.
-- Workaround: use SDK 1.31.0 from the maintained v1 line and verify exact protocol negotiation in an integration test; build an independent web simulator.
-- Suggested improvement: publish a version-pinned Alexa+ hackathon starter with a runnable `initialize`/`tools/list`/`tools/call` check and a clearly labeled simulated-experience route.
-- Evidence: official rule/FAQ and SDK URLs in README; `test/integration.test.js` checks exact negotiation.
-- Qualification: the gating/version issue is documentary evidence; no failed attempt to access or install gated tools is claimed.
-
-## Friction log 2 — Proposal versus confirmation examples
-
-- Task: design a household workflow that proposes actions but requires human review for changes.
-- Steps: implement MCP tool previews, then implement confirmation, expiry, stale-revision checks and undo outside the tool surface.
-- Expected: a reference workflow showing how an MCP tool proposal can remain separate from a user-approved, reversible action across turns.
-- Actual: the SDK supplied tool registration and transport, while this project had to define its own consent and state-transition contract. This is a documentation/example request derived from development, not a claim that the SDK has a bug.
-- Severity: Important for this use case.
-- Workaround: agent-callable tools cannot confirm; the frontend sends an authenticated-by-origin/CSRF local request referencing an immutable draft ID.
-- Suggested improvement: an official multi-turn sample with reversible drafts, explicit confirmation and replay protection.
-- Evidence: `src/planner.js`, `src/mcp.js`, confirmation/recovery tests.
-
-## Feature requests
-
-1. Critical for onboarding: version-pinned, publicly accessible Alexa+ hackathon MCP starter.
-2. Important: a documented reference pattern for preview → consent → commit → compensation.
-3. Nice-to-have: a simulator trace view that displays structured results and negotiated protocol version.
-
-Do not report a bonus as earned. The rules describe a possible friction-log bonus of up to 10%; organizers decide whether this feedback qualifies.
-
-## Demo-production tools — not application runtime integrations
-
-These tools prepared the demonstration, not the household planner. Their use does not establish a live Alexa connection, an AWS integration, or eligibility for another track or mini challenge.
-
-### Kokoro Heart through the official Hugging Face demo
-
-- Purpose and onboarding: selected `af_heart` in the official Chrome-accessed demo, used CPU at speed 1, and generated ten English narration clips without a paid API or subscription. The owner selected this voice; `narration-provenance.json` records the settings and published asset hash.
-- Worked well: all ten clips were generated and incorporated into the 164.45-second demonstration. The existing original video was retained rather than overwritten.
-- Needs work: this browser-based production flow still needed a separate local alignment and caption-authoring step. We did not establish that the model or demo promises caption export, so this is a workflow improvement request, not a reported product defect.
-- Would use again: yes, for short synthetic narration with separate quality checks and clear disclosure. No human listening review or general pronunciation-quality claim is made here.
-- Suggested improvement: optionally export timestamped captions alongside the generated clip, with an explicit warning that timings still need review.
-
-### faster-whisper 1.2.1 with base.en
-
-- Purpose and onboarding: ran locally on CPU to align the known 379-word narration script and independently transcribe the rendered audio. It is not part of the planner and does not provide a voice-input feature to users.
-- Worked well: produced 56 timed English cues; the complete script was retained, and isolated rechecks helped investigate two initially uncertain recognition passages.
-- Needs work: transcription can differ in numeral formatting and Jo/Joe spelling. Known-script alignment alone cannot prove that the audio actually contains every word, which is why a separate unprompted transcription was used.
-- Would use again: yes, as an assisted captioning and diagnostic step, not a replacement for listening. No platform defect is inferred from the initial recognition differences.
-
-### FFmpeg through imageio-ffmpeg
-
-- Purpose and onboarding: used local media commands to assemble captured application footage, encode H.264/AAC, preserve the selected narration, and render the aligned captions into the existing footer.
-- Worked well: the final file decoded through all 3,932 frames, and audio-packet hashing confirmed that caption rendering did not replace the selected narration. Caption placement keeps the application controls visible.
-- Needs work: correct cue layout, complete picture coverage and preserved audio required explicit checks in our production workflow. We observed no FFmpeg defect in those checks; this is not a wider reliability claim.
-- Would use again: yes, for repeatable local rendering with frame-count, audio and visual verification.
-
-The evidence and limits for this production work are summarized in `demo-video.md`, `narration-provenance.json` and `validation.md`. These additions disclose supporting tools; they are not extra Amazon platform friction-log entries or a claim that a bonus has been earned.
+Yes. The multi-round-trip confirmation and MCP Apps together cover what a household agent needs: act only after a
+yes, and show the person what they are agreeing to. The rough edges above are about defaults and documentation,
+not about the design.
