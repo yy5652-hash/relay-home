@@ -37,9 +37,14 @@ test('a quote cannot be altered and an order needs the exact confirmed total', (
   const quote = quoteGroceries(home, { items: ['spinach'] }, SECRET);
   assert.equal(quote.total, 3.2);
   const [body, mac] = quote.token.split('.');
-  const forged = Buffer.from(JSON.stringify({ ...JSON.parse(Buffer.from(body, 'base64url')), total: 0.01 })).toString('base64url');
+  const fields = JSON.parse(Buffer.from(body, 'base64url'));
+  assert.equal(fields[3], 320);
+  const forged = Buffer.from(JSON.stringify(fields.with(3, 1))).toString('base64url');   // the same quote for one cent
   assert.throws(() => readQuote(`${forged}.${mac}`, SECRET), Refusal);
   assert.throws(() => readQuote(quote.token, SECRET, quote.expires + 1), /expired/);
+  // Short enough for a model to copy from one call into the next without damaging it.
+  assert.ok(quote.token.length < 120, `token is ${quote.token.length} characters`);
+  assert.throws(() => readQuote(quote.token.slice(0, -1) + (quote.token.endsWith('A') ? 'B' : 'A'), SECRET), Refusal);
   const read = readQuote(quote.token, SECRET);
   assert.throws(() => placeOrder(home, read, { confirmedTotal: 3, key: 'a' }), /not the quoted total/);
   const order = placeOrder(home, read, { confirmedTotal: 3.2, key: 'a' });
@@ -89,4 +94,16 @@ test('the stored plan reports what has happened since it was drawn', () => {
   assert.equal(planNow(home).dinner.order, null);
   // The stored draft itself is left as it was drawn.
   assert.equal(home.plan.pickup.status, undefined);
+});
+
+test('a helper who confirmed can still drop out, and then nobody is named', () => {
+  const home = newHousehold();
+  const request = requestPickup(home, 'Jo');
+  recordReply(home, request.id, true);
+  assert.throws(() => recordReply(home, request.id, true), /already answered/);
+  recordReply(home, request.id, false);
+  assert.equal(home.requests[0].status, 'declined');
+  const plan = drawPlan(home);
+  assert.equal(plan.pickup, null);
+  assert.match(plan.blockers[0], /Nobody on the school pickup list/);
 });

@@ -8,8 +8,7 @@ import { InMemoryTransport } from '@modelcontextprotocol/server';
 import { Homes } from '../src/domain/store.js';
 import { createRelayServer } from '../src/mcp/server.js';
 
-async function connect({ answer = true } = {}) {
-  const homes = new Homes(mkdtempSync(join(tmpdir(), 'relay-')));
+async function connect({ answer = true, homes = new Homes(mkdtempSync(join(tmpdir(), 'relay-'))) } = {}) {
   const server = createRelayServer({ homes, id: 'test-home', secret: 'test-secret' });
   const asked = [];
   const client = new Client({ name: 'test-client', version: '1.0.0' }, { capabilities: { elicitation: { form: {} } } });
@@ -81,4 +80,50 @@ test('an unapproved neighbour cannot be asked, and a refusal leads to a blocked 
   const plan = (await call('draft_evening_plan', {})).structuredContent.plan;
   assert.equal(plan.pickup, null);
   assert.equal(plan.blockers.length, 1);
+});
+
+test('a quote says when the basket is not what the drafted dinner needs', async () => {
+  const { call } = await connect();
+  await call('draft_evening_plan', {});                                   // soup: everything is in the pantry
+  const stray = await call('quote_groceries', { items: ['spinach'] });
+  assert.equal(stray.structuredContent.matchesDraftedDinner, false);
+  assert.match(stray.content[0].text, /drafted dinner is chickpea and tomato soup.*draft_evening_plan/);
+  await call('draft_evening_plan', { meal: 'pasta' });
+  const fits = await call('quote_groceries', { items: ['spinach'] });
+  assert.equal(fits.structuredContent.matchesDraftedDinner, true);
+  assert.doesNotMatch(fits.content[0].text, /Note:/);
+});
+
+test('cancelling an order, taking back a request and raising the cap all wait for a yes', async () => {
+  const yes = await connect();
+  await yes.call('draft_evening_plan', { meal: 'pasta' });
+  const quoted = (await yes.call('quote_groceries', { items: ['spinach'] })).structuredContent;
+  const order = (await yes.call('place_grocery_order', { quoteToken: quoted.quoteToken, orderKey: 'evening-9' })).structuredContent.order;
+  const request = (await yes.call('ask_helper', { name: 'Jo' })).structuredContent.request;
+  const home = () => yes.homes.read('test-home');
+
+  const no = await connect({ answer: false, homes: yes.homes });
+  assert.equal((await no.call('cancel_grocery_order', { orderId: order.id })).structuredContent.done, false);
+  assert.equal(home().orders[0].status, 'placed');
+  assert.equal((await no.call('withdraw_pickup_request', { requestId: request.id })).structuredContent.done, false);
+  assert.equal(home().requests[0].status, 'awaiting reply');
+  assert.equal((await no.call('update_preferences', { weeklyGroceryCap: 500 })).structuredContent.done, false);
+  assert.equal(home().memory.weeklyGroceryCap, 40);
+  assert.deepEqual(no.asked, [`Cancel order ${order.id} (spinach, $3.20)?`, 'Take back the request to Jo?', 'Change what Relay remembers: weekly grocery cap $40.00 to $500.00?']);
+
+  assert.equal((await yes.call('cancel_grocery_order', { orderId: order.id })).structuredContent.order.status, 'cancelled');
+  assert.equal(home().memory.spentThisWeek, 21.4);
+  assert.equal((await yes.call('withdraw_pickup_request', { requestId: request.id })).structuredContent.request.status, 'withdrawn');
+  assert.equal((await yes.call('update_preferences', { weeklyGroceryCap: 60 })).structuredContent.memory.weeklyGroceryCap, 60);
+});
+
+test('when the helper says no, the stored plan is drawn again and names nobody who is not eligible', async () => {
+  const { call } = await connect();
+  await call('draft_evening_plan', { budget: 8 });
+  const request = (await call('ask_helper', { name: 'Jo' })).structuredContent.request;
+  const answer = await call('record_helper_reply', { requestId: request.id, accepted: false });
+  assert.equal(answer.structuredContent.plan.pickup, null);
+  assert.equal(answer.structuredContent.plan.constraints.budget, 8);
+  assert.match(answer.content[0].text, /Jo cannot do it.*drawn again: Nobody on the school pickup list/);
+  assert.equal((await call('get_household')).structuredContent.plan.pickup, null);
 });

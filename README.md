@@ -40,11 +40,11 @@ Then try this, in order:
    A receipt card appears and the evening card updates itself.
 5. Ask **What do you remember?**, reload the page, and ask again: the household is kept between sessions.
 
-Other things worth trying: say "No" on a confirmation sheet (nothing happens, and Relay does not ask again);
+Other things worth trying: say "No" on a confirmation sheet (nothing happens, and the server does not put the question again);
 "Jo can't make it" (Jo is left out, and with nobody else eligible the plan is blocked and names no one);
 "Keep dinner under $2 and 20 minutes"; "Set the weekly cap to $22" and then try to order.
 
-Run the tests with `pnpm test` (26 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
+Run the tests with `pnpm test` (30 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
 revisions, the agent, the model adapters).
 
 ## Connect your own MCP client
@@ -75,11 +75,11 @@ curl -s -X POST http://localhost:4317/mcp \
 | `draft_evening_plan` | Puts pickup and dinner into one stored draft | draft only | evening |
 | `ask_helper` | Records a pickup request to an eligible person | **needs a yes** | evening |
 | `record_helper_reply` | Stores the helper's answer; a "no" removes them from today's plans | yes | evening |
-| `withdraw_pickup_request` | Takes back an unanswered request | yes | evening |
+| `withdraw_pickup_request` | Takes back an unanswered request | **needs a yes** | evening |
 | `quote_groceries` | Prices the missing items; returns a signed ten-minute quote | no | |
 | `place_grocery_order` | Buys exactly the quoted items | **needs a yes** | receipt |
-| `cancel_grocery_order` | Cancels an order and returns the amount to the cap | yes | receipt |
-| `update_preferences` | Changes the diet preference or the weekly grocery cap | yes | |
+| `cancel_grocery_order` | Cancels an order and returns the amount to the cap | **needs a yes** | receipt |
+| `update_preferences` | Changes the diet preference or the weekly grocery cap | **needs a yes** | |
 | `confirm_action` | Redeems a confirmation ticket (for clients that cannot be asked directly) | **needs a ticket** | |
 
 ## How the parts work
@@ -92,7 +92,8 @@ still cannot get past these; `test/` exercises each of them.
 
 ![Relay asks before it acts](docs/screenshots/confirmation.jpg)
 
-**Confirmation happens inside the protocol.** `ask_helper` and `place_grocery_order` first answer `input_required`
+**Confirmation happens inside the protocol.** Every tool that does something for the household (asking a helper,
+taking a request back, buying, cancelling an order, changing the weekly cap) first answers `input_required`
 with a question for the person (the multi-round-trip pattern of the 2026-07-28 revision). The client shows the
 question, and the retried call carries the answer together with the state the server sealed, so a yes cannot be
 replayed for a different action. An answer that is not a yes ends the call with `done: false`. A 2025-11-25 client on
@@ -112,8 +113,9 @@ household only through the MCP endpoint, over HTTP, with the visitor's own token
 **Which model drives the agent.** By default a small scripted model follows the skill, so the project runs without a
 key and behaves the same every time. Set `GEMINI_API_KEY`, or `LLM_API_KEY` + `LLM_BASE_URL` + `LLM_MODEL` for any
 OpenAI-compatible service, and a hosted model takes its place with the same skill and tools (see `.env.example`).
-If the hosted model does not answer, the scripted one takes that turn and the page says so. The two adapters are
-tested against each service's wire format with a stand-in for the network; see "Limits" below.
+If the hosted model does not answer, the scripted one takes that turn and the page says so. Both adapters are
+tested against each service's wire format with a stand-in for the network, and the Gemini one has been run live
+(`gemini-3.5-flash-lite`, free tier); see "Limits" below.
 
 **State across sessions.** Each household is one JSON file under `.data/`, written atomically. The token is the
 sealed household id; the page keeps it in the browser, so a reload or a second MCP client sees the same evening.
@@ -128,7 +130,7 @@ src/http.js     /mcp behind bearer auth, the chat stream, the endpoints the page
 skills/         the Agent Skill
 web/            source of the card code and of the page's host code (bundled by `pnpm build`)
 public/         the simulator page
-test/           26 tests
+test/           30 tests
 docs/           product feedback and friction log, submission text
 ```
 
@@ -140,8 +142,8 @@ docs/           product feedback and friction log, submission text
   simulator does is unknown to us.
 - The household, calendar, travel times, shop and prices are fixed demo data. No calendar, messaging or shop service
   is connected, and Relay never contacts the helper; someone has to tell it what the helper answered.
-- The scripted model understands a limited set of sentences. The hosted-model adapters have been checked against the
-  wire format only, not against the live services.
+- The scripted model understands a limited set of sentences. The Gemini adapter has been run against the live
+  service; the OpenAI-compatible adapter only against the wire format.
 - The bearer token is a signed household id for a demo, not an OAuth flow. Do not put real personal data in it.
 - No user research: nobody outside the project has tried it, and no time saving has been measured.
 

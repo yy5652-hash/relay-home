@@ -1,9 +1,9 @@
 1
-00:00:01,105 --> 00:00:06,958
+00:00:01,106 --> 00:00:06,959
 It is 4:40. School has just moved Mia's pickup to 5:15, and Alex's train is late.
 
 2
-00:00:07,620 --> 00:00:10,211
+00:00:07,619 --> 00:00:10,210
 One change, and the whole evening comes apart.
 
 3
@@ -11,77 +11,77 @@ One change, and the whole evening comes apart.
 Relay Home rebuilds it, and asks before it acts.
 
 4
-00:00:16,845 --> 00:00:22,994
+00:00:16,849 --> 00:00:22,998
 This page stands in for Alexa+. Behind it are a real MCP server and an Agent Skill.
 
 5
-00:00:23,962 --> 00:00:30,108
+00:00:23,949 --> 00:00:30,095
 One sentence. The agent reads the household, checks helpers and dinners in parallel, and drafts a plan.
 
 6
-00:00:31,051 --> 00:00:34,949
+00:00:31,448 --> 00:00:35,346
 Every card on screen is an MCP Apps view, served by the server.
 
 7
-00:00:37,835 --> 00:00:43,899
+00:00:37,838 --> 00:00:43,902
 Sam would be five minutes late. Lee lives closer, but is not on the school's list. Only Jo may be asked.
 
 8
-00:00:46,241 --> 00:00:48,642
-Ask for anyone else, and the server refuses.
+00:00:46,245 --> 00:00:48,469
+Ask for anyone else, and the answer is no.
 
 9
-00:00:51,962 --> 00:00:57,960
+00:00:53,868 --> 00:00:59,866
 A tap on a card does not act. It goes back through the agent, and the server answers: input required.
 
 10
-00:00:58,261 --> 00:00:59,898
+00:01:00,168 --> 00:01:01,805
 Say no, and nothing happens.
 
 11
-00:01:01,694 --> 00:01:04,846
+00:01:06,189 --> 00:01:09,341
 Only a yes, bound to this exact action, lets it through.
 
 12
-00:01:05,260 --> 00:01:09,614
+00:01:10,394 --> 00:01:14,748
 Jo has been asked. Relay does not call the pickup covered until Jo answers.
 
 13
-00:01:18,585 --> 00:01:24,277
+00:01:24,291 --> 00:01:29,983
 Dinner needs spinach. The shop returns a signed quote, and Relay asks again, for the exact total.
 
 14
-00:01:27,418 --> 00:01:33,529
+00:01:34,122 --> 00:01:40,233
 The order is placed once, inside the weekly grocery cap. The evening card updates itself through the host.
 
 15
-00:01:36,716 --> 00:01:43,588
+00:01:43,424 --> 00:01:50,296
 The household is remembered between sessions, for this page and for any other MCP client with the same token.
 
 16
-00:01:48,930 --> 00:01:53,962
-And if Jo could not come? The plan stops, and names no one. It will not reach for the neighbour.
+00:01:56,525 --> 00:02:01,435
+And if Jo drops out? The plan stops, and names no one. It will not reach for the neighbour.
 
 17
-00:01:56,918 --> 00:02:04,626
+00:02:04,536 --> 00:02:12,244
 Under the hood: twelve tools over Streamable HTTP, on the newest protocol revision, with a fallback for older clients.
 
 18
-00:02:04,877 --> 00:02:08,494
+00:02:12,496 --> 00:02:16,113
 The rules live in the server, so no model can talk its way past them.
 
 19
-00:02:08,745 --> 00:02:16,534
-In this recording a scripted model follows the skill, so every run is the same. Add a key, and a hosted model takes its place.
+00:02:16,364 --> 00:02:23,651
+In this recording, Gemini drives the agent through the skill. With no key at all, a built-in scripted model takes its place.
 
 20
-00:02:16,785 --> 00:02:20,976
-Twenty-six tests cover the rules, both protocol revisions, and the agent.
+00:02:23,902 --> 00:02:27,784
+Thirty tests cover the rules, both protocol revisions, and the agent.
 
 21
-00:02:23,463 --> 00:02:30,934
+00:02:29,175 --> 00:02:36,646
 The household and the shop are simulated. The protocol, the confirmations and the cards are real, and run from one command.
 
 22
-00:02:32,382 --> 00:02:36,069
+00:02:38,096 --> 00:02:41,783
 Relay Home. A changed pickup should not derail the whole evening.

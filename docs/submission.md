@@ -36,7 +36,8 @@ preview tools are not open to participants, so this runs in a browser page that 
 
 - **MCP server** (TypeScript SDK 2.x, Streamable HTTP, stateless, bearer auth): twelve tools. It speaks protocol
   revision 2026-07-28 and still serves 2025-11-25 clients.
-- **Confirmation inside the protocol.** The two tools that act for the household answer `input_required` with a
+- **Confirmation inside the protocol.** The five tools that act for the household (ask a helper, take a request
+  back, buy, cancel an order, change the weekly cap) answer `input_required` with a
   question; the retried call must carry the person's yes and the state the server sealed, so a yes cannot be replayed
   for another action. Older clients that cannot be asked get a sealed five-minute ticket and a `confirm_action` tool.
 - **Purchasing with guard rails.** A quote is signed by the server (HMAC) and valid for ten minutes; an order must
@@ -48,11 +49,11 @@ preview tools are not open to participants, so this runs in a browser page that 
   still passes the agent and the confirmation.
 - **Agent Skill.** `skills/relay-home-evening` (agentskills.io layout) tells an agent the order of work and the rules
   it must not bend. The simulator's agent loads it and reaches the household only through the MCP endpoint.
-- **Agent.** A small loop that runs independent tool calls in parallel. By default a scripted model follows the
-  skill so the demo runs without a key and is repeatable; adapters for Gemini and any OpenAI-compatible service
-  take its place when a key is set, with the scripted model as a stand-in if the service does not answer.
+- **Agent.** A small loop that runs independent tool calls in parallel. In the demo video the agent is Gemini 3.5
+  Flash-Lite following the skill. Without a key a built-in scripted model takes its place, so the project still runs
+  out of the box and behaves the same every time; an adapter for any OpenAI-compatible service is included too.
 - **Rules in the server.** Every rule above is enforced by the server and covered by tests, so an agent that
-  ignores the skill still cannot get past them. 26 tests: the rules, the server in memory, the real HTTP endpoint on
+  ignores the skill still cannot get past them. 30 tests: the rules, the server in memory, the real HTTP endpoint on
   both protocol revisions, the agent, the model adapters.
 
 ## Challenges
@@ -60,7 +61,7 @@ preview tools are not open to participants, so this runs in a browser page that 
 We could not test on Alexa+, so we do not know how it answers `input_required`, renders views or loads a skill. We
 built for both protocol revisions and kept every rule in the server for that reason. The most instructive bug was
 ours: a declined confirmation was asked again eight times, because our handler only recognised a yes. The details
-of this and nine other rough edges are in `docs/product-feedback.md`.
+of this and eleven other rough edges are in `docs/product-feedback.md`.
 
 ## Accomplishments we are proud of
 
@@ -88,4 +89,4 @@ Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript.
 
 - Video: see `docs/demo-video.md`. Product feedback and friction log: `docs/product-feedback.md`.
 - AI coding assistance was used to write this project.
-- Not claimed: an Alexa+ integration, real services, user research, a live run with a hosted model.
+- Not claimed: an Alexa+ integration, real services, user research. Only the Gemini adapter has been run live.

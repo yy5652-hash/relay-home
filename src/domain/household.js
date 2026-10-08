@@ -16,6 +16,7 @@ export function newHousehold() {
     date: '2026-10-22',
     now: at(16, 40),
     child: 'Mia',
+    childPronouns: 'she/her',
     event: {
       source: 'Oakfield School notice',
       received: at(16, 40),
@@ -24,10 +25,10 @@ export function newHousehold() {
     pickup: { deadline: at(17, 15), location: 'Oakfield School, main gate', original: 'Alex' },
     // "approved" is the school's pickup list, "free" comes from each person's calendar, "travel" from their usual start point.
     people: [
-      { name: 'Alex', role: 'Parent', approved: true, free: at(18, 10), travel: 15, note: 'Train delayed, arrives 6:10 PM' },
-      { name: 'Sam', role: 'Parent', approved: true, free: at(17, 0), travel: 20, note: 'Client call until 5:00 PM' },
-      { name: 'Jo', role: 'Neighbour', approved: true, free: at(16, 45), travel: 15, note: 'On the school pickup list since September' },
-      { name: 'Lee', role: 'Neighbour', approved: false, free: at(16, 40), travel: 10, note: 'Not on the school pickup list' }
+      { name: 'Alex', role: 'Parent', pronouns: 'he/him', approved: true, free: at(18, 10), travel: 15, note: 'Train delayed, arrives 6:10 PM' },
+      { name: 'Sam', role: 'Parent', pronouns: 'she/her', approved: true, free: at(17, 0), travel: 20, note: 'Client call until 5:00 PM' },
+      { name: 'Jo', role: 'Neighbour', pronouns: 'they/them', approved: true, free: at(16, 45), travel: 15, note: 'On the school pickup list since September' },
+      { name: 'Lee', role: 'Neighbour', pronouns: 'he/him', approved: false, free: at(16, 40), travel: 10, note: 'Not on the school pickup list' }
     ],
     dinner: { time: at(18, 30), cook: 'Sam' },
     pantry: { pasta: 1, tomatoes: 2, chickpeas: 1, rice: 1, onion: 2 },

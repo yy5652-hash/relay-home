@@ -18,7 +18,7 @@ export async function runTurn({ client, model, skill, conversation, text, emit =
     // Calls the model issued together are independent, so they run together.
     const results = await Promise.all(move.calls.map(async call => {
       const started = performance.now();
-      emit({ type: 'call', id: call.id, name: call.name, args: call.args });
+      emit({ type: 'call', id: call.id, name: call.name, args: call.args, together: move.calls.length });
       let result;
       try { result = await client.callTool({ name: call.name, arguments: call.args }); }
       catch (error) { result = { isError: true, content: [{ type: 'text', text: String(error.message ?? error) }] }; }

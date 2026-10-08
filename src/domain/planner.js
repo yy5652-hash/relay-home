@@ -10,7 +10,7 @@ export function pickupOptions(home, { exclude = [] } = {}) {
     if (!person.approved) reasons.push('Not on the school pickup list');
     if (unavailable.has(person.name.toLowerCase())) reasons.push('Said no for this evening');
     if (arrives > home.pickup.deadline) reasons.push(`Would arrive ${arrives - home.pickup.deadline} min late (${clock(arrives)})`);
-    return { name: person.name, role: person.role, approved: person.approved, arrives, arrivesLabel: clock(arrives), note: person.note, eligible: reasons.length === 0, reasons };
+    return { name: person.name, role: person.role, pronouns: person.pronouns, approved: person.approved, arrives, arrivesLabel: clock(arrives), note: person.note, eligible: reasons.length === 0, reasons };
   }).sort((a, b) => Number(b.eligible) - Number(a.eligible) || Number(b.role === 'Parent') - Number(a.role === 'Parent') || a.arrives - b.arrives);
 }
 

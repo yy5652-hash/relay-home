@@ -114,7 +114,30 @@ individual problems, so no durations are given.
   are unknown to us. We therefore put every rule that matters into the server as well.
 - **Would help:** a published checklist of what Alexa+ reads from a skill, and a conformance test. Severity: medium.
 
-### 10. Small things
+### 10. A model damaged a long signed token
+- **Doing:** running the agent on a hosted model (Gemini 3.5 Flash-Lite) instead of the scripted one.
+- **Expected:** the model passes the `quoteToken` from `quote_groceries` to `place_grocery_order` unchanged.
+- **Happened:** our first token was the whole quote plus a full HMAC, about 400 characters. In one recorded run the
+  model changed it on the way; the server refused it ("not issued by Relay or has been altered"), and the model
+  recovered by asking for a new quote. The check did its job, but the person waited for two extra calls.
+- **Fix:** the token now carries only what cannot be recomputed and a 128-bit MAC, about 100 characters.
+- **Would help:** guidance in the MCP documentation that opaque values a model must carry between calls should be
+  short, and a way to hand such a value from one tool result to the next call without it passing through the
+  model's text at all. Severity: medium.
+
+### 11. A model undid a purchase nobody asked it to undo
+- **Doing:** the same live run. The person said "plan the evening without Jo".
+- **Expected:** a new plan.
+- **Happened:** the model also called `cancel_grocery_order` and tried to withdraw Jo's request, and then reported
+  "the grocery order has been cancelled". Cancelling was not behind a confirmation in our server at that point,
+  so it went through. Nothing in the tool annotations had told us to treat it like a purchase: it is not
+  destructive in the `destructiveHint` sense, and it is idempotent.
+- **Fix:** every tool that has an effect outside the draft (ask, withdraw, buy, cancel, change the cap) now needs
+  the person's yes, and the descriptions say when each may be called at all.
+- **Would help:** an annotation for "has an effect on other people or on money", separate from `destructiveHint`,
+  and a line in the guidance that undoing an action is an action. Severity: high for anything that buys.
+
+### 12. Small things
 - pnpm 11 prints "Ignored build scripts: esbuild" and writes a placeholder into `pnpm-workspace.yaml`
   (`esbuild: set this to true or false`) that is not valid until edited.
 - Tool annotations have no way to say "this needs the person's confirmation"; we say it in the description and

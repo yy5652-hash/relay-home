@@ -77,7 +77,7 @@ async function handle(event, turn, rows) {
   } else if (event.type === 'model') {
     $('model').textContent = event.model;
   } else if (event.type === 'call') {
-    const row = el('li', { class: 'call pending' }, el('code', {}, event.name), el('span', { class: 'args' }, Object.keys(event.args).length ? JSON.stringify(event.args).replace(/"quoteToken":"[^"]+"/, '"quoteToken":"…"') : ''), el('span', { class: 'ms' }, '…'));
+    const row = el('li', { class: 'call pending' }, el('code', {}, event.name, event.together > 1 && el('em', { title: `Issued together with ${event.together - 1} other call${event.together > 2 ? 's' : ''}` }, '∥ parallel')), el('span', { class: 'args' }, Object.keys(event.args).length ? JSON.stringify(event.args).replace(/"quoteToken":"[^"]+"/, '"quoteToken":"…"') : ''), el('span', { class: 'ms' }, '…'));
     rows.set(event.id, row);
     turn.append(row);
   } else if (event.type === 'result') {

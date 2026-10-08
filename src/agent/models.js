@@ -26,7 +26,7 @@ export class OpenAICompatModel {
       else if (message.role === 'assistant') messages.push({ role: 'assistant', content: message.text });
       else for (const result of message.results) messages.push({ role: 'tool', tool_call_id: result.id, content: JSON.stringify({ summary: result.summary, data: result.data, error: result.error }) });
     }
-    const answer = await ask(this.fetch, `${this.base}/chat/completions`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${this.key}` }, body: JSON.stringify({ model: this.model, messages, tools: toolSchemas(tools).map(fn => ({ type: 'function', function: fn })), temperature: 0.2 }) });
+    const answer = await ask(this.fetch, `${this.base}/chat/completions`, { method: 'POST', headers: { 'content-type': 'application/json', authorization: `Bearer ${this.key}` }, body: JSON.stringify({ model: this.model, messages, tools: toolSchemas(tools).map(fn => ({ type: 'function', function: fn })), temperature: 0 }) });
     const choice = answer.choices[0].message;
     if (choice.tool_calls?.length) return { calls: choice.tool_calls.map(call => ({ id: call.id, name: call.function.name, args: JSON.parse(call.function.arguments || '{}') })) };
     return { text: choice.content ?? '' };
@@ -47,7 +47,7 @@ export class GeminiModel {
       else contents.push({ role: 'user', parts: message.results.map(result => ({ functionResponse: { name: result.name, response: { summary: result.summary, data: result.data, error: result.error } } })) });
     }
     const clean = schema => JSON.parse(JSON.stringify(schema, (key, value) => (key === '$schema' || key === 'additionalProperties' ? undefined : value)));
-    const body = { systemInstruction: { parts: [{ text: instructions }] }, contents, tools: [{ functionDeclarations: toolSchemas(tools).map(fn => ({ ...fn, parameters: clean(fn.parameters) })) }], generationConfig: { temperature: 0.2 } };
+    const body = { systemInstruction: { parts: [{ text: instructions }] }, contents, tools: [{ functionDeclarations: toolSchemas(tools).map(fn => ({ ...fn, parameters: clean(fn.parameters) })) }], generationConfig: { temperature: 0 } };
     const answer = await ask(this.fetch, `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-goog-api-key': this.key }, body: JSON.stringify(body) });
     const parts = answer.candidates?.[0]?.content?.parts ?? [];
     const calls = parts.filter(part => part.functionCall).map(part => ({ id: randomUUID().slice(0, 8), name: part.functionCall.name, args: part.functionCall.args ?? {} }));

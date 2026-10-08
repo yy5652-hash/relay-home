@@ -84,7 +84,8 @@ export class ScriptedModel {
 
     if (want.kind === 'cap') {
       if (!seen.update_preferences) return { calls: [call('update_preferences', { weeklyGroceryCap: want.amount })] };
-      return { text: seen.update_preferences.summary };
+      if (seen.update_preferences.data?.done === false) return { text: 'Understood, the cap stays as it is.' };
+      return { text: seen.update_preferences.summary.replace('Confirmed and done: ', 'Remembered: ') };
     }
 
     if (want.kind === 'cancel') {
@@ -92,12 +93,13 @@ export class ScriptedModel {
       const order = home.orders.findLast(item => item.status === 'placed');
       if (!order) return { text: 'There is no open order to cancel.' };
       if (!seen.cancel_grocery_order) return { calls: [call('cancel_grocery_order', { orderId: order.id })] };
-      return { text: `${seen.cancel_grocery_order.summary} ${money(order.total)} is back in this week's cap.` };
+      if (seen.cancel_grocery_order.data?.done === false) return { text: 'Understood, the order stays.' };
+      return { text: `Order ${order.id} is cancelled. ${money(order.total)} is back in this week's cap.` };
     }
 
     if (want.kind === 'reply') {
       if (!home) return { calls: [call('get_household')] };
-      const request = home.requests.findLast(item => item.name === want.who && item.status === 'awaiting reply');
+      const request = home.requests.findLast(item => item.name === want.who && (item.status === 'awaiting reply' || (item.status === 'confirmed' && !want.accepted)));
       if (!request && !seen.record_helper_reply) return { text: `I have no open request to ${want.who}. Ask me to plan the evening and I will check who can make it.` };
       if (!seen.record_helper_reply) return { calls: [call('record_helper_reply', { requestId: request.id, accepted: want.accepted })] };
       if (want.accepted) { notes.offer = null; return { text: `Good. ${want.who} has confirmed, so the pickup is covered.` }; }
