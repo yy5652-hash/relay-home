@@ -87,6 +87,7 @@ Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript.
 
 ## Notes for the form
 
-- Video: see `docs/demo-video.md`. Product feedback and friction log: `docs/product-feedback.md`.
+- Video: https://youtu.be/W3LUTcaPIeE (public, 2:44; notes in `docs/demo-video.md`). Repository: https://github.com/yy5652-hash/relay-home (public, MIT).
+- Product feedback and friction log: `docs/product-feedback.md`.
 - AI coding assistance was used to write this project.
 - Not claimed: an Alexa+ integration, real services, user research. Only the Gemini adapter has been run live.

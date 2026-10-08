@@ -16,6 +16,9 @@ It is three things that work together:
 > up. No message is sent to anyone and no money moves. The Alexa+ preview tools are not open to hackathon
 > participants, so this has **not** been run on Alexa+; the browser page stands in for it, as the hackathon FAQ allows.
 
+**Demo video (2:44):** <https://youtu.be/W3LUTcaPIeE>. The file and its captions are on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media);
+[`docs/demo-video.md`](docs/demo-video.md) says how it was recorded and reproduces the conversation in it.
+
 ![The evening card after Jo has confirmed and the groceries are ordered](docs/screenshots/evening-ordered.jpg)
 
 ## Run it
