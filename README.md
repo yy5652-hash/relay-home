@@ -20,7 +20,7 @@ It is three things that work together:
 
 ## Run it
 
-Needs Node.js 22 or later and pnpm.
+Needs Node.js 22.9 or later and pnpm. Settings are optional; copy `.env.example` to `.env` to change any.
 
 ```bash
 pnpm install

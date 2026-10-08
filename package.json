@@ -6,10 +6,10 @@
   "description": "Relay Home: a consent-first household agent for Alexa+. A Streamable HTTP MCP server with MCP Apps views, an Agent Skill and a simulated Alexa+ host.",
   "license": "MIT",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.9"
   },
   "scripts": {
-    "start": "node src/server.js",
+    "start": "node --env-file-if-exists=.env src/server.js",
     "build": "node scripts/build.mjs",
     "test": "node --test"
   },
