@@ -1,15 +1,8 @@
-# Render blueprint: one free web service that runs the MCP server and the simulator page.
+# Render blueprint: one free web service, built from the Dockerfile, that runs the MCP server and the simulator page.
 # The free instance sleeps when idle and has no disk, so demo households start fresh after a restart.
 services:
   - type: web
     name: relay-home
-    runtime: node
+    runtime: docker
     plan: free
-    buildCommand: corepack enable && pnpm install --prod --frozen-lockfile
-    startCommand: node src/server.js
     healthCheckPath: /api/health
-    envVars:
-      - key: HOST
-        value: 0.0.0.0
-      - key: NODE_VERSION
-        value: "24"

@@ -52,7 +52,7 @@ revisions, the agent, the model adapters).
 
 ## Host it
 
-`render.yaml` describes one free web service on Render (Node, `node src/server.js`, health check `/api/health`).
+`render.yaml` describes one free web service on Render, built from the `Dockerfile` (health check `/api/health`).
 The server answers only to its own public name, which Render passes in `RENDER_EXTERNAL_HOSTNAME`; elsewhere set
 `HOST=0.0.0.0` and `RELAY_ALLOWED_HOSTS=your.host.name`. A free instance sleeps when idle and has no disk, so the
 demo households start fresh after a restart. Without a model key the hosted page runs the scripted model.
