@@ -16,7 +16,8 @@ It is three things that work together:
 > up. No message is sent to anyone and no money moves. The Alexa+ preview tools are not open to hackathon
 > participants, so this has **not** been run on Alexa+; the browser page stands in for it, as the hackathon FAQ allows.
 
-**Demo video (2:44):** <https://youtu.be/W3LUTcaPIeE>. The file and its captions are on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media);
+**Try it in the browser:** <https://relay-home.onrender.com> (a free instance: the first load can take up to a minute
+while it wakes, and it runs the scripted model). **Demo video (2:44):** <https://youtu.be/W3LUTcaPIeE>. The file and its captions are on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media);
 [`docs/demo-video.md`](docs/demo-video.md) says how it was recorded and reproduces the conversation in it.
 
 ![The evening card after Jo has confirmed and the groceries are ordered](docs/screenshots/evening-ordered.jpg)
@@ -55,7 +56,8 @@ revisions, the agent, the model adapters).
 `render.yaml` describes one free web service on Render, built from the `Dockerfile` (health check `/api/health`).
 The server answers only to its own public name, which Render passes in `RENDER_EXTERNAL_HOSTNAME`; elsewhere set
 `HOST=0.0.0.0` and `RELAY_ALLOWED_HOSTS=your.host.name`. A free instance sleeps when idle and has no disk, so the
-demo households start fresh after a restart. Without a model key the hosted page runs the scripted model.
+demo households start fresh after a restart. Without a model key the hosted page runs the scripted model. Our own
+copy runs at <https://relay-home.onrender.com>, and its MCP endpoint is `https://relay-home.onrender.com/mcp`.
 
 ## Connect your own MCP client
 

@@ -87,6 +87,7 @@ Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript.
 
 ## Notes for the form
 
+- Live demo: https://relay-home.onrender.com (free instance, scripted model; MCP endpoint at `/mcp`).
 - Video: https://youtu.be/W3LUTcaPIeE (public, 2:44; notes in `docs/demo-video.md`). Repository: https://github.com/yy5652-hash/relay-home (public, MIT).
 - Product feedback and friction log: `docs/product-feedback.md`.
 - AI coding assistance was used to write this project.
