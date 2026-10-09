@@ -102,7 +102,7 @@ Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript; Python, Strands Agents
 ## Notes for the form
 
 - Live demo: https://relay-home.onrender.com (free instance; Gemini 3.5 Flash-Lite on a free quota, scripted model as stand-in; MCP endpoint at `/mcp`).
-- Video: https://youtu.be/W3LUTcaPIeE (public, 2:44; notes in `docs/demo-video.md`). Repository: https://github.com/yy5652-hash/relay-home (public, MIT).
+- Video: `‹new YouTube URL›` once published (1:52; the current public one, https://youtu.be/W3LUTcaPIeE, is the 2.0 film; notes in `docs/demo-video.md`). Repository: https://github.com/yy5652-hash/relay-home (public, MIT).
 - Product feedback and friction log: `docs/product-feedback.md`.
 - AI coding assistance was used to write this project.
 - AWS Builder: Strands Agents SDK, documented in `integrations/strands/README.md`; Bedrock not run (no AWS account).
