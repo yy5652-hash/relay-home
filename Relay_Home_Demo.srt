@@ -1,79 +1,79 @@
 1
-00:00:01,103 --> 00:00:07,169
-It is 4:40. School has just moved Mia's pickup to 5:15, and Alex's train is late.
+00:00:01,005 --> 00:00:04,695
+4:40. The school just moved Mia's pickup to 5:15.
 
 2
-00:00:07,619 --> 00:00:10,280
-One change, and the whole evening comes apart.
+00:00:05,198 --> 00:00:06,771
+Alex's train is late.
 
 3
-00:00:11,433 --> 00:00:14,252
-Relay Home rebuilds it, and asks before it acts.
+00:00:07,621 --> 00:00:10,136
+One change. The whole evening comes apart.
 
 4
-00:00:16,846 --> 00:00:24,151
-This kitchen display stands in for Alexa+. Behind it are a self-hosted MCP server and an Agent Skill.
+00:00:11,941 --> 00:00:15,409
+Relay Home rebuilds the evening. And it asks before it acts.
 
 5
-00:00:25,082 --> 00:00:31,405
-One sentence. The agent reads the household, checks helpers and dinners in parallel, and drafts a plan.
+00:00:17,814 --> 00:00:18,847
+Say what changed.
 
 6
-00:00:32,392 --> 00:00:37,939
-Every card on the screen is an MCP Apps view, served by the server in a sandboxed frame.
+00:00:19,770 --> 00:00:24,065
+Who can collect Mia. What dinner fits. One plan.
 
 7
-00:00:39,810 --> 00:00:44,967
-Lee lives closest, but is not on the school's pickup list. Relay will not suggest Lee.
+00:00:25,488 --> 00:00:29,394
+Every step: a real MCP call.
 
 8
-00:00:47,358 --> 00:00:52,379
-Asking another adult to collect a child is not something an assistant should do on its own.
+00:00:32,684 --> 00:00:37,841
+Not on the school list: never suggested.
 
 9
-00:00:54,085 --> 00:00:58,266
-So the tool answers input required, and the question comes to the person.
+00:00:40,745 --> 00:00:47,021
+Nothing happens without your yes.
 
 10
-00:00:59,288 --> 00:01:04,129
-Only a yes records the request. The pickup is not covered until Jo says so.
+00:00:48,442 --> 00:00:52,369
+Asked. Not covered until Jo answers.
 
 11
-00:01:07,306 --> 00:01:11,439
-Relay makes Jo a private link, and shows it as a code for Jo's phone.
+00:00:52,530 --> 00:00:56,663
+A private link, for this request only.
 
 12
-00:01:12,283 --> 00:01:15,848
-The page behind it holds one question, and can do nothing else.
+00:00:59,771 --> 00:01:01,465
+Jo's phone. One question.
 
 13
-00:01:17,063 --> 00:01:23,145
-Jo taps yes. The display hears it within seconds, and the card now reads: confirmed from their phone.
+00:01:05,404 --> 00:01:09,114
+Confirmed, from Jo's own phone.
 
 14
-00:01:25,532 --> 00:01:31,134
-Dinner needs spinach. Relay gets a signed quote from the shop and asks for the exact total.
+00:01:11,191 --> 00:01:15,553
+The exact total. Nothing more.
 
 15
-00:01:32,144 --> 00:01:37,494
-Yes, and the order is placed once, inside the weekly cap. The evening card updates itself.
+00:01:16,966 --> 00:01:19,050
+Once. Inside the weekly cap.
 
 16
-00:01:40,693 --> 00:01:42,539
-Later, something comes up for Jo.
+00:01:20,475 --> 00:01:22,519
+Jo cannot make it.
 
 17
-00:01:44,542 --> 00:01:50,572
-Relay draws the plan again. With nobody else on the school list in time, it stops, and names no one.
+00:01:24,610 --> 00:01:30,359
+It stops. It names no one.
 
 18
-00:01:53,112 --> 00:02:01,915
-Twelve tools over Streamable HTTP, on both protocol revisions. Every rule lives in the server, and thirty-three tests hold them.
+00:01:31,683 --> 00:01:40,921
+A self-hosted MCP server. An Agent Skill. MCP Apps cards.
 
 19
-00:02:02,115 --> 00:02:09,170
-In this recording, Gemini drives the agent through the skill. A Strands agent drives the same server from a terminal.
+00:01:41,222 --> 00:01:44,453
+The same server, from a Strands agent.
 
 20
-00:02:12,033 --> 00:02:17,347
-A changed pickup should not derail the whole evening. Relay Home: it asks before it acts.
+00:01:47,271 --> 00:01:49,544
+Relay Home. It asks before it acts.
