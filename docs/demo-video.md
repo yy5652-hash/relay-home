@@ -1,23 +1,23 @@
 # Demo video
 
-Length 2:44, 1920x1080, English, burned-in captions, with a matching `.srt`.
+Length 2:19, 1920x1080, English, burned-in captions, with a matching `.srt`. This is the third film; it shows
+Relay Home 2.1 (the kitchen display, and Jo answering from their own phone).
 
 **What is on screen.** After the opening card, everything behind the graphics is a recording of this repository's
-simulator page running against its own MCP server on the same machine, driven by a script that clicks and types the
-way a person would. Nothing is mocked for the film: the cards, the confirmation sheets, the list of MCP calls and
-their timings are what the page showed, and the strip at the top counts the calls and confirmations as the page
-reports them. The agent in the recording is Gemini 3.5 Flash-Lite (gemini-3.5-flash-lite, free tier) following the
-skill; its answers are its own and are reproduced below. The chapter bands, stamps, callouts, the grocery-cap gauge
-and the opening, "under the hood" and closing cards are drawn over the page for the film.
+simulator page running against its own MCP server on the same machine, driven by a script that clicks, types and
+taps the way a person would, on the display and on the helper's phone. Nothing is mocked for the film: the cards,
+the confirmation sheets, the code, the phone page, the "Just in" announcements, the list of MCP calls and their
+timings are what the page showed, and the strip at the top counts the calls and confirmations as the page reports
+them. The agent in the recording is Gemini 3.5 Flash-Lite (`gemini-3.5-flash-lite`, free tier) following the skill;
+its answers are its own and are reproduced below. The chapter bands, stamps, callouts, the grocery-cap gauge and
+the opening, "under the hood" and closing cards are drawn over the page for the film.
 
 **How it was made.** A headless Chromium plays a step list (say this sentence, click this, frame that). The picture
 is the browser's own screencast, placed on a 30 fps timeline by frame timestamps. The narration is a synthetic voice
 (Kokoro, Apache-2.0). The soundtrack is synthesised from oscillators and noise by our own script; no existing
 recording, sample or melody is used. Chapter changes wait for the next bar line, so the cuts fall on the music.
-
-A hosted model does not answer the same way twice. We recorded several takes while fixing what the model's mistakes
-showed us (see the friction log, items 10 and 11) and kept the first take in which every answer matched what had
-actually happened.
+The reply link in the film is built on the hosted copy's address, so the code on screen points at
+relay-home.onrender.com; the phone beside the display opened the same page on the recording machine.
 
 ## Narration
 
@@ -26,56 +26,36 @@ actually happened.
 | 0:01.1 | It is 4:40. School has just moved Mia's pickup to 5:15, and Alex's train is late. |
 | 0:07.6 | One change, and the whole evening comes apart. |
 | 0:11.4 | Relay Home rebuilds it, and asks before it acts. |
-| 0:16.8 | This page stands in for Alexa+. Behind it are a real MCP server and an Agent Skill. |
-| 0:23.9 | One sentence. The agent reads the household, checks helpers and dinners in parallel, and drafts a plan. |
-| 0:31.4 | Every card on screen is an MCP Apps view, served by the server. |
-| 0:37.8 | Sam would be five minutes late. Lee lives closer, but is not on the school's list. Only Jo may be asked. |
-| 0:46.2 | Ask for anyone else, and the answer is no. |
-| 0:53.9 | A tap on a card does not act. It goes back through the agent, and the server answers: input required. |
-| 1:00.2 | Say no, and nothing happens. |
-| 1:06.2 | Only a yes, bound to this exact action, lets it through. |
-| 1:10.4 | Jo has been asked. Relay does not call the pickup covered until Jo answers. |
-| 1:24.3 | Dinner needs spinach. The shop returns a signed quote, and Relay asks again, for the exact total. |
-| 1:34.1 | The order is placed once, inside the weekly grocery cap. The evening card updates itself through the host. |
-| 1:43.4 | The household is remembered between sessions, for this page and for any other MCP client with the same token. |
-| 1:56.5 | And if Jo drops out? The plan stops, and names no one. It will not reach for the neighbour. |
-| 2:04.5 | Under the hood: twelve tools over Streamable HTTP, on the newest protocol revision, with a fallback for older clients. |
-| 2:12.5 | The rules live in the server, so no model can talk its way past them. |
-| 2:16.4 | In this recording, Gemini drives the agent through the skill. With no key at all, a built-in scripted model takes its place. |
-| 2:23.9 | Thirty tests cover the rules, both protocol revisions, and the agent. |
-| 2:29.2 | The household and the shop are simulated. The protocol, the confirmations and the cards are real, and run from one command. |
-| 2:38.1 | Relay Home. A changed pickup should not derail the whole evening. |
+| 0:16.8 | This kitchen display stands in for Alexa+. Behind it are a self-hosted MCP server and an Agent Skill. |
+| 0:25.1 | One sentence. The agent reads the household, checks helpers and dinners in parallel, and drafts a plan. |
+| 0:32.4 | Every card on the screen is an MCP Apps view, served by the server in a sandboxed frame. |
+| 0:39.8 | Lee lives closest, but is not on the school's pickup list. Relay will not suggest Lee. |
+| 0:47.4 | Asking another adult to collect a child is not something an assistant should do on its own. |
+| 0:54.1 | So the tool answers input required, and the question comes to the person. |
+| 0:59.3 | Only a yes records the request. The pickup is not covered until Jo says so. |
+| 1:07.3 | Relay makes Jo a private link, and shows it as a code for Jo's phone. |
+| 1:12.3 | The page behind it holds one question, and can do nothing else. |
+| 1:17.1 | Jo taps yes. The display hears it within seconds, and the card now reads: confirmed from their phone. |
+| 1:25.5 | Dinner needs spinach. Relay gets a signed quote from the shop and asks for the exact total. |
+| 1:32.1 | Yes, and the order is placed once, inside the weekly cap. The evening card updates itself. |
+| 1:40.7 | Later, something comes up for Jo. |
+| 1:44.5 | Relay draws the plan again. With nobody else on the school list in time, it stops, and names no one. |
+| 1:53.1 | Twelve tools over Streamable HTTP, on both protocol revisions. Every rule lives in the server, and thirty-three tests hold them. |
+| 2:02.1 | In this recording, Gemini drives the agent through the skill. A Strands agent drives the same server from a terminal. |
+| 2:12.0 | A changed pickup should not derail the whole evening. Relay Home: it asks before it acts. |
 
-## The conversation in the recording
+## The conversation in the film
 
-**Person:** School moved Mia's pickup to 5:15 and Alex's train is late. Keep dinner under $8.
+What the page showed, in order. Relay's lines are the model's own; the two "Just in" lines are the display's
+announcements of what Jo did on their phone.
 
-**Relay:** Jo can collect Mia by 5:00 PM. For dinner, Sam can make chickpea and tomato soup at 6:10 PM using only the pantry, so it costs nothing. Shall I ask Jo to pick up Mia?
+**You:** School moved Mia's pickup to 5:15 and Alex's train is late. Keep dinner under $8.
+**Relay:** Jo can collect Mia by 5:00 PM. For dinner, Sam can make chickpea and tomato soup at 6:10 PM using only the pantry items at no extra cost. Shall I ask Jo to pick up Mia?
+**You:** Ask Jo
+**Relay:** Jo has been asked to pick up Mia and we are awaiting their reply.
+**Relay:** Jo confirmed. The pickup is covered.
+**You:** Make the pasta and order what we need.
+**Relay:** Jo confirmed the pickup, and the spinach has been ordered for $3.20 for store collection at 5:45 PM. Sam will make the tomato and chickpea pasta starting at 6:05 PM.
+**Relay:** Jo cannot do it and is left out for today. Nobody on the school pickup list can be there by 5:15 PM. Call the school or an approved adult; Relay will not suggest anyone else.
 
-**Person:** Ask Lee
-
-**Relay:** Lee is not on the school pickup list, so they cannot collect Mia. Jo is eligible to help instead. Shall I ask Jo?
-
-**Person:** Ask Jo
-
-**Relay:** Nothing was done.
-
-**Person:** Ask Jo
-
-**Relay:** Jo has been asked.
-
-**Person:** Jo confirmed
-
-**Relay:** Jo has confirmed the pickup. Sam will make chickpea and tomato soup at 6:10 PM using pantry items at no cost.
-
-**Person:** Make the pasta and order what we need.
-
-**Relay:** I've ordered the spinach for $3.20 from Corner Market for collection from 5:45 PM. Sam will make tomato and chickpea pasta at 6:05 PM, and Jo is confirmed to pick up Mia at 5:15 PM.
-
-**Person:** What do you remember?
-
-**Relay:** I remember your vegetarian diet preference, the $40.00 weekly grocery cap ($24.60 spent this week), and that Jo is confirmed to pick up Mia at 5:15 PM. I also remember the current plan for tomato and chickpea pasta with spinach ordered for collection from 5:45 PM.
-
-**Person:** Jo can't make it after all
-
-**Relay:** Nobody else is eligible to collect Mia by 5:15 PM. You will need to contact the school or an approved adult directly.
+Calls per turn: get_household, find_pickup_helpers, suggest_dinners, draft_evening_plan / ask_helper, confirmation / draft_evening_plan, quote_groceries, place_grocery_order, confirmation.

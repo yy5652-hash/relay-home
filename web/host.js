@@ -135,6 +135,7 @@ async function card(event) {
   $('screen').querySelector('.empty')?.remove();
   $('screen').querySelector(`figure[data-view="${event.view}"]`)?.remove();
   $('screen').prepend(el('figure', { 'data-view': event.view }, frame, el('figcaption', {}, el('code', {}, event.view), ` · result of ${event.name}`)));
+  $('screen').scrollTo({ top: 0, behavior: 'smooth' });     // a new card comes into view, whatever was being looked at
   const bridge = new AppBridge(null, { name: 'Relay Home simulator', version: '2.1.0' }, { serverTools: {}, openLinks: {} }, { hostContext: { theme, displayMode: 'inline', platform: 'web' } });
   bridge.oninitialized = () => {
     bridge.sendToolInput({ arguments: event.args ?? {} });
