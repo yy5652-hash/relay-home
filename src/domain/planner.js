@@ -60,6 +60,9 @@ export function planNow(home) {
   if (plan.pickup) {
     const request = home.requests.findLast(item => item.name === plan.pickup.who && item.status !== 'withdrawn');
     plan.pickup.status = request?.status ?? 'not asked';
+    // While the answer is open the plan carries the helper's reply link, so a card can show it as a code to scan.
+    if (request?.status === 'awaiting reply' && request.replyUrl) plan.pickup.replyUrl = request.replyUrl;
+    if (request?.via === 'link') plan.pickup.answeredVia = 'link';
   }
   if (plan.dinner) {
     const order = plan.dinner.missing.length ? home.orders.findLast(item => item.status === 'placed' && plan.dinner.missing.every(name => item.lines.some(line => line.name === name))) : null;

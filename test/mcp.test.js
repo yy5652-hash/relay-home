@@ -124,6 +124,6 @@ test('when the helper says no, the stored plan is drawn again and names nobody w
   const answer = await call('record_helper_reply', { requestId: request.id, accepted: false });
   assert.equal(answer.structuredContent.plan.pickup, null);
   assert.equal(answer.structuredContent.plan.constraints.budget, 8);
-  assert.match(answer.content[0].text, /Jo cannot do it.*drawn again: Nobody on the school pickup list/);
+  assert.match(answer.content[0].text, /Jo cannot do it.*Nobody on the school pickup list/);
   assert.equal((await call('get_household')).structuredContent.plan.pickup, null);
 });

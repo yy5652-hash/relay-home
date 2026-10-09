@@ -46,7 +46,7 @@ test('yes asks the helper after a confirmation; a refusal by the helper ends in 
   await say('Plan the evening.');
   const asked = await say('Yes');
   assert.equal(questions.length, 1);
-  assert.match(asked, /^Jo has been asked\. I will count the pickup as covered once Jo answers\./);
+  assert.match(asked, /^Jo has been asked\. The code on the screen opens Jo's own reply link, and I will count the pickup as covered once Jo answers\./);
   assert.equal(homes.read('agent-home').requests[0].status, 'awaiting reply');
   const blocked = await say('Jo can\'t make it.');
   assert.match(blocked, /Jo is out for today\. Nobody on the school pickup list can be there by 5:15 PM/);

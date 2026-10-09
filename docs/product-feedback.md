@@ -1,6 +1,6 @@
 # Product feedback and friction log
 
-Written during the build of Relay Home 2.0 (October 2026). Everything below was hit while writing the code in this
+Written during the build of Relay Home 2.0 and 2.1 (October 2026). Everything below was hit while writing the code in this
 repository; where an item is about documentation rather than behaviour, it says so. We had no access to the Alexa+
 preview tools (Category SDK, MCP Toolkit, Alexa CLI, Web Simulator), so nothing here is hands-on feedback on those;
 the section "What we could not test" lists what that leaves open.
@@ -143,16 +143,46 @@ individual problems, so no durations are given.
 - Tool annotations have no way to say "this needs the person's confirmation"; we say it in the description and
   enforce it in the handler. `destructiveHint` is not the same thing.
 
+### 13. An answer that arrives outside the conversation has no way to reach the host
+- **Doing:** letting the helper answer a pickup request from their own phone, through a link, while the family's
+  display shows the evening.
+- **Steps:** the helper's page posts the answer to the server; the household changes; the display should say
+  "Jo confirmed" and the agent should know before the person's next sentence.
+- **Expected:** a way for the server to tell the host "something changed for this household".
+- **Happened:** our endpoint is stateless Streamable HTTP, as the hackathon asks, so there is no open channel to
+  notify on, and a resource subscription would need a session. Nothing in a tool result can arrive later.
+- **Workaround:** the simulator page polls its own small API every 2.5 seconds and announces what is new; the
+  agent gets a note ("Update from Relay Home, not said by the person: ...") placed before the next user message.
+  Neither of these is MCP, so neither would exist on a real host.
+- **Would help:** for Alexa+ add-ons, a documented way for a self-hosted server to raise an event for a household
+  between turns (a proactive notification the customer has allowed, or a callback URL the host gives the server),
+  and a statement of what the assistant is told about it. Every multi-party task needs this: a helper, a courier,
+  a second parent. Severity: high.
+
+### 14. A card cannot follow a link; the host must agree to open it
+- **Doing:** showing the helper's reply link in the evening card, as a code and as a button.
+- **Steps:** an anchor in the card; then `window.open`.
+- **Expected:** a link in a view opens.
+- **Happened:** a view runs in a sandboxed frame, so neither works. `app.openLink()` asks the host to do it, and
+  the host must advertise `openLinks` and implement `onopenlink`. We found this in the package's type definitions.
+- **Workaround:** our host opens exactly one kind of link (a reply link on its own origin) and refuses the rest.
+- **Would help:** say in the MCP Apps overview that views cannot navigate and name `openLink`; recommend a default
+  policy for hosts (same-origin only, or ask the person). Whether Alexa+ would open a link from a card at all, and on
+  which device, is unknown to us. Severity: low.
+
 ## What we could not test
 
 The Alexa+ preview tools are not available to hackathon participants. So we do not know: which protocol revision
 Alexa+ speaks to a self-hosted server; whether it answers `input_required` or elicitation by voice, on screen, or not
 at all; whether and how it renders MCP Apps views on Echo Show devices; how it authenticates to a self-hosted
-server on behalf of a household; and how it loads Agent Skills. We built for both protocol revisions and kept
+server on behalf of a household; how it loads Agent Skills; and whether a server can reach a household between
+turns (entry 13). We built for both protocol revisions and kept
 every rule in the server because of this.
 
 ## Feature requests, in order
 
+0. **Events between turns** (entry 13): the one thing we could not build inside the protocol. Priority: critical
+   for anything that involves a second person.
 1. **A public Alexa+ conformance client** (even a command-line one) that connects to a self-hosted MCP server the way
    Alexa+ does and reports what it would do with each tool, view and confirmation. This would have replaced most of
    our guessing.

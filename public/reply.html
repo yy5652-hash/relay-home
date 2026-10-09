@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>A pickup request · Relay Home</title>
+<style>
+:root { --ink: #10151c; --ink2: #4b5563; --line: #dfe3e8; --page: #f3f5f7; --card: #ffffff; --accent: #0b6e99; --ok: #17694a; --okbg: #e3f3ec; --no: #9b2c2c; --nobg: #fbe9e9; }
+@media (prefers-color-scheme: dark) { :root { --ink: #f2f4f7; --ink2: #aab3bf; --line: #2c3540; --page: #080c11; --card: #10161d; --accent: #58c1ee; --ok: #7fd9b0; --okbg: #12372a; --no: #f3a1a1; --nobg: #3d1b1b; } }
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px 14px; background: var(--page); color: var(--ink); font: 17px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+main { width: 100%; max-width: 380px; display: grid; gap: 14px; }
+.from { color: var(--ink2); font-size: 14px; margin: 0; }
+h1 { margin: 0; font-size: 24px; line-height: 1.25; }
+dl { margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 6px 16px; }
+dl div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-top: 1px solid var(--line); } dl div:first-child { border-top: 0; }
+dt { color: var(--ink2); } dd { margin: 0; font-weight: 600; text-align: right; }
+.answers { display: grid; gap: 10px; }
+button { font: inherit; font-weight: 650; border-radius: 14px; padding: 15px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+button.yes { background: var(--accent); border-color: var(--accent); color: var(--card); } button:disabled { opacity: .5; }
+.state { border-radius: 14px; padding: 14px 16px; font-weight: 600; } .state.ok { background: var(--okbg); color: var(--ok); } .state.no { background: var(--nobg); color: var(--no); } .state.plain { background: var(--card); border: 1px solid var(--line); font-weight: 400; }
+.small { color: var(--ink2); font-size: 13px; margin: 0; } .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; font-size: 15px; justify-self: start; }
+</style>
+</head>
+<body>
+<main id="page" aria-live="polite"><p class="from">Opening the request…</p></main>
+<script type="module">
+// The helper's side of a pickup request. This page knows one thing, the code in its address, and can do one thing
+// with it: answer the question that was asked. It cannot see the household.
+const code = location.pathname.split('/').pop();
+const page = document.getElementById('page');
+const el = (tag, attrs = {}, ...children) => { const node = Object.assign(document.createElement(tag), attrs); node.append(...children.filter(Boolean)); return node; };
+let shown = null;
+
+async function answer(accepted) {
+  for (const button of page.querySelectorAll('button')) button.disabled = true;
+  const response = await fetch(`/api/reply/${code}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ accepted }) });
+  draw(await response.json());
+}
+
+function draw(ask) {
+  shown = ask.status ?? null;
+  if (!ask.helper) return page.replaceChildren(el('h1', {}, 'This link does not work'), el('p', { className: 'from' }, ask.error ?? 'Ask the family to send it again.'));
+  const facts = el('dl', {}, el('div', {}, el('dt', {}, 'Where'), el('dd', {}, ask.where)), el('div', {}, el('dt', {}, 'Be there by'), el('dd', {}, ask.by)));
+  const head = [el('p', { className: 'from' }, `${ask.from} ask, through Relay Home`), el('h1', {}, `${ask.helper}, can you collect ${ask.child} today?`), facts];
+  const foot = el('p', { className: 'small' }, 'This link only answers this one request. A made-up family in a demo: nobody is waiting at a real school.');
+  if (ask.status === 'awaiting reply') return page.replaceChildren(...head, el('div', { className: 'answers' }, el('button', { className: 'yes', onclick: () => answer(true) }, 'Yes, I will be there'), el('button', { onclick: () => answer(false) }, 'Sorry, I cannot')), foot);
+  if (ask.status === 'confirmed') return page.replaceChildren(...head, el('p', { className: 'state ok' }, `Thank you. ${ask.from} can see that you are collecting ${ask.child}.`), el('button', { className: 'link', onclick: () => answer(false) }, 'Something came up, I cannot do it after all'), foot);
+  if (ask.status === 'declined') return page.replaceChildren(...head, el('p', { className: 'state no' }, `Understood. ${ask.from} know you cannot do it today.`), foot);
+  page.replaceChildren(...head, el('p', { className: 'state plain' }, 'The family took this request back. There is nothing for you to do.'), foot);
+}
+
+try { draw(await (await fetch(`/api/reply/${code}`)).json()); } catch { draw({ error: 'The page could not reach Relay Home. Try again in a moment.' }); }
+// The family may take the request back while this page is open.
+setInterval(async () => { if (document.hidden || page.querySelector('button:disabled')) return; try { const now = await (await fetch(`/api/reply/${code}`)).json(); if (now.status && now.status !== shown) draw(now); } catch { /* try again on the next tick */ } }, 5000);
+</script>
+</body>
+</html>

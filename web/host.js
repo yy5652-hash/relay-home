@@ -10,7 +10,7 @@ const el = (tag, attrs = {}, ...children) => {
   return node;
 };
 const money = amount => `$${Number(amount).toFixed(2)}`;
-const theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+const theme = 'dark';      // the display is a device of its own and stays dark
 
 let token;
 let busy = false;
@@ -24,10 +24,17 @@ async function start() {
   try { localStorage.setItem('relay-home-token', token); } catch { /* fine without it */ }
   $('endpoint').textContent = `${location.origin}/mcp`;
   await household();
+  // The household outlives the page: a plan drawn earlier, on this device or by another MCP client, is back on screen.
+  const kept = (await (await api('/api/tool', { method: 'POST', body: JSON.stringify({ name: 'get_household', arguments: {} }) })).json()).structuredContent?.plan;
+  if (kept) await card({ view: 'ui://relay-home/plan.html', name: 'get_household', args: {}, summary: kept.summary, data: { plan: kept } });
+  const refresh = () => { if (!busy && !document.hidden) household().catch(() => {}); };
+  setInterval(refresh, 2500);
+  document.addEventListener('visibilitychange', refresh);
 }
 
 // ---------------------------------------------------------------- conversation
 function bubble(who, text) {
+  $('talk').querySelector('.hint')?.remove();
   const node = el('div', { class: `bubble ${who}` }, text);
   $('talk').append(node);
   node.scrollIntoView({ block: 'end', behavior: 'smooth' });
@@ -102,9 +109,21 @@ function confirmSheet(question) {
     $('question').textContent = question;
     $('sheet').hidden = false;
     $('yes').focus();
-    const done = answer => { $('sheet').hidden = true; $('yes').onclick = $('no').onclick = null; resolve(answer); };
+    let listener = null;
+    const done = answer => { $('sheet').hidden = true; $('heard').hidden = true; $('yes').onclick = $('no').onclick = null; listener?.abort(); resolve(answer); };
     $('yes').onclick = () => done(true);
     $('no').onclick = () => done(false);
+    // With voice on, the question is read out and a spoken yes or no answers it; anything else leaves the buttons.
+    if (!voiceOn) return;
+    speak(question, () => {
+      if ($('sheet').hidden || !Recognition) return;
+      listener = new Recognition();
+      listener.lang = 'en-US';
+      listener.onresult = event => { const said = event.results[0][0].transcript.trim().toLowerCase(); if (/^(yes|yeah|yep|sure|ok|okay|go ahead|do it|please do)\b/.test(said)) done(true); else if (/^(no|nope|don'?t|do not|cancel|stop|not now)\b/.test(said)) done(false); };
+      listener.onend = () => { $('heard').hidden = true; };
+      $('heard').hidden = false;
+      try { listener.start(); } catch { $('heard').hidden = true; }
+    });
   });
 }
 
@@ -116,7 +135,7 @@ async function card(event) {
   $('screen').querySelector('.empty')?.remove();
   $('screen').querySelector(`figure[data-view="${event.view}"]`)?.remove();
   $('screen').prepend(el('figure', { 'data-view': event.view }, frame, el('figcaption', {}, el('code', {}, event.view), ` · result of ${event.name}`)));
-  const bridge = new AppBridge(null, { name: 'Relay Home simulator', version: '2.0.0' }, { serverTools: {} }, { hostContext: { theme, displayMode: 'inline', platform: 'web' } });
+  const bridge = new AppBridge(null, { name: 'Relay Home simulator', version: '2.1.0' }, { serverTools: {}, openLinks: {} }, { hostContext: { theme, displayMode: 'inline', platform: 'web' } });
   bridge.oninitialized = () => {
     bridge.sendToolInput({ arguments: event.args ?? {} });
     bridge.sendToolResult({ content: [{ type: 'text', text: event.summary }], structuredContent: event.data });
@@ -124,6 +143,8 @@ async function card(event) {
   bridge.onsizechange = ({ height }) => { if (height) frame.style.height = `${Math.ceil(height)}px`; };
   // A card may read from the MCP server through the host; only read-only tools are forwarded.
   bridge.oncalltool = async ({ name, arguments: args }) => (await api('/api/tool', { method: 'POST', body: JSON.stringify({ name, arguments: args ?? {} }) })).json();
+  // A card may ask for one kind of link to be opened: a helper's reply link on this server.
+  bridge.onopenlink = async ({ url }) => { const target = new URL(url, location.origin); if (target.origin !== location.origin || !target.pathname.startsWith('/r/')) return { isError: true }; window.open(target, '_blank', 'noopener'); return {}; };
   // A tap inside a card arrives as a message for the conversation; the agent decides what to do with it.
   bridge.onmessage = async ({ content }) => { const text = content?.find(part => part.type === 'text')?.text; if (text) send(text); return {}; };
   await bridge.connect(new PostMessageTransport(frame.contentWindow, frame.contentWindow));
@@ -131,13 +152,25 @@ async function card(event) {
 }
 
 // ---------------------------------------------------------------- household panel
+let announced = null;
 async function household() {
   const home = await (await api('/api/home')).json();
+  // What happened outside the conversation (a helper answering from their phone) is announced on the display.
+  if (announced !== null) for (const text of home.announcements.slice(announced)) { bubble('relay news', text); speak(text); }
+  announced = home.announcements.length;
+  // The helper's phone: the page behind the newest reply link, shown beside the display.
+  const asked = home.requests.findLast(request => request.replyUrl && request.status !== 'withdrawn');
+  $('phone').hidden = !asked;
+  if (asked) {
+    $('phone-who').textContent = asked.name;
+    const path = new URL(asked.replyUrl, location.origin).pathname;
+    if (!$('phone-frame').src.endsWith(path)) $('phone-frame').src = path;
+  }
   const left = home.memory.weeklyGroceryCap - home.memory.spentThisWeek;
   $('notice').textContent = home.event.text;
   $('home').replaceChildren(
     el('h3', {}, 'Pickup requests'),
-    home.requests.length ? el('ul', {}, home.requests.map(request => el('li', {}, el('span', {}, `${request.name} · ${request.status}`), request.status === 'awaiting reply' && el('span', { class: 'play' }, el('button', { onclick: () => send(`${request.name} confirmed`) }, `${request.name} says yes`), el('button', { onclick: () => send(`${request.name} can't make it`) }, `${request.name} says no`))))) : el('p', { class: 'quiet' }, 'Nobody has been asked.'),
+    home.requests.length ? el('ul', {}, home.requests.map(request => el('li', {}, el('span', {}, `${request.name} · ${request.status}`), request.status === 'awaiting reply' && el('span', { class: 'play' }, el('span', { class: 'quiet' }, 'Or tell Relay yourself:'), el('button', { onclick: () => send(`${request.name} confirmed`) }, `“${request.name} confirmed”`), el('button', { onclick: () => send(`${request.name} can't make it`) }, `“${request.name} can't make it”`))))) : el('p', { class: 'quiet' }, 'Nobody has been asked.'),
     el('h3', {}, 'Orders'),
     home.orders.length ? el('ul', {}, home.orders.map(order => el('li', {}, el('span', {}, `${order.id} · ${order.lines.map(line => line.name).join(', ')} · ${money(order.total)} · ${order.status}`)))) : el('p', { class: 'quiet' }, 'Nothing ordered.'),
     el('h3', {}, 'What Relay remembers'),
@@ -147,14 +180,17 @@ async function household() {
 
 // ---------------------------------------------------------------- voice
 let voiceOn = false;
-function speak(text) {
-  if (!voiceOn || !('speechSynthesis' in window)) return;
+function speak(text, then = () => {}) {
+  if (!voiceOn || !('speechSynthesis' in window)) return then();
   speechSynthesis.cancel();
-  speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.onend = utterance.onerror = () => then();
+  speechSynthesis.speak(utterance);
 }
 const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (!Recognition) $('mic').hidden = true;
 $('mic').onclick = () => {
+  speechSynthesis?.cancel();
   const listener = new Recognition();
   listener.lang = 'en-US';
   listener.onresult = event => send(event.results[0][0].transcript);

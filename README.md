@@ -3,13 +3,14 @@
 **A changed pickup time should not derail the whole evening.** Relay Home is a household agent for Alexa+ that
 rebuilds an evening after a change of plan: it works out who is allowed and able to collect the child, picks a dinner
 that fits the pantry and the budget, and then asks before it requests anything from a person or spends any money.
+The adult it asks answers for themselves, on their own phone, through a link that can do nothing else.
 
 It is three things that work together:
 
 - a **self-hosted MCP server** over Streamable HTTP (protocol revision 2026-07-28, and still serving 2025-11-25 clients),
 - an **Agent Skill** that tells an agent how to use it,
-- a **simulated Alexa+ experience** in the browser: a conversation, a screen that shows the server's **MCP Apps** cards,
-  and a panel that lists every MCP call the agent makes.
+- a **simulated Alexa+ experience** in the browser: a kitchen display with voice, the server's **MCP Apps** cards on
+  its screen, the helper's phone beside it, and a panel that lists every MCP call the agent makes.
 
 > **What is real and what is not.** The MCP server, the protocol traffic, the confirmation flow, the cards and the
 > skill are real and run on your machine. The household, the school notice and the shop ("Corner Market") are made
@@ -38,25 +39,32 @@ Then try this, in order:
 
 1. Click **The pickup moved**. Relay reads the household, checks helpers and dinners in parallel, and drafts a plan.
    Three cards appear on the screen; the panel on the right shows the four MCP calls behind them.
-2. Click **Ask Jo** inside the card. Relay's question comes up as a confirmation sheet. Say **Yes**.
-   The card now reads "Asked · waiting for an answer"; Relay does not call the pickup covered.
-3. Under *The household*, click **Jo says yes** (you are playing Jo). The card changes to "Confirmed".
+2. Click **Ask Jo** inside the card. Relay's question covers the display. Say **Yes**.
+   The card now reads "Asked · waiting for an answer" and shows a code for Jo's phone; Relay does not call the
+   pickup covered.
+3. *Jo's phone* has appeared beside the display, showing what the code opens. Tap **Yes, I will be there** on it
+   (you are playing Jo; on the hosted copy you can scan the code with a real phone instead). Within a few seconds
+   the display says "Just in · Jo confirmed" and the card changes to "Confirmed from their phone".
 4. Click **Pasta, and order it**. Relay prices the missing spinach, asks you to confirm $3.20, and places the order.
    A receipt card appears and the evening card updates itself.
-5. Ask **What do you remember?**, reload the page, and ask again: the household is kept between sessions.
+5. Ask **What do you remember?**, then reload the page: the evening card is back on the display, because the
+   household is kept between sessions.
 
-Other things worth trying: say "No" on a confirmation sheet (nothing happens, and the server does not put the question again);
+Other things worth trying: on Jo's phone, tap **Something came up** after confirming (the display announces it, and
+with nobody else on the school list in time the plan stops and names no one); turn on **Voice** and answer a
+confirmation by saying yes or no; say "No" on a confirmation sheet (nothing happens, and the server does not put the question again);
 "Jo can't make it" (Jo is left out, and with nobody else eligible the plan is blocked and names no one);
 "Keep dinner under $2 and 20 minutes"; "Set the weekly cap to $22" and then try to order.
 
-Run the tests with `pnpm test` (30 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
-revisions, the agent, the model adapters).
+Run the tests with `pnpm test` (33 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
+revisions, the helper's reply link, the agent, the model adapters).
 
 ## Host it
 
 `render.yaml` describes one free web service on Render, built from the `Dockerfile` (health check `/api/health`).
 The server answers only to its own public name, which Render passes in `RENDER_EXTERNAL_HOSTNAME`; elsewhere set
-`HOST=0.0.0.0` and `RELAY_ALLOWED_HOSTS=your.host.name`. A free instance sleeps when idle and has no disk, so the
+`HOST=0.0.0.0`, `RELAY_ALLOWED_HOSTS=your.host.name` and `RELAY_PUBLIC_URL=https://your.host.name` (the address
+reply links are built on; Render's own is used there). A free instance sleeps when idle and has no disk, so the
 demo households start fresh after a restart. Without a model key the hosted page runs the scripted model; with
 `GEMINI_API_KEY` set as an environment variable it runs Gemini. Our own copy runs at <https://relay-home.onrender.com>
 with a Gemini key, and its MCP endpoint is `https://relay-home.onrender.com/mcp`.
@@ -87,8 +95,8 @@ curl -s -X POST http://localhost:4317/mcp \
 | `find_pickup_helpers` | Checks every adult against the school list, their calendar and travel time, with reasons | no | helpers |
 | `suggest_dinners` | Ranks meals by pantry coverage within time, diet and what is left of the weekly cap | no | dinners |
 | `draft_evening_plan` | Puts pickup and dinner into one stored draft | draft only | evening |
-| `ask_helper` | Records a pickup request to an eligible person | **needs a yes** | evening |
-| `record_helper_reply` | Stores the helper's answer; a "no" removes them from today's plans | yes | evening |
+| `ask_helper` | Records a pickup request to an eligible person and makes their private reply link | **needs a yes** | evening |
+| `record_helper_reply` | Stores an answer the household passes on; a "no" removes them from today's plans | yes | evening |
 | `withdraw_pickup_request` | Takes back an unanswered request | **needs a yes** | evening |
 | `quote_groceries` | Prices the missing items; returns a signed ten-minute quote | no | |
 | `place_grocery_order` | Buys exactly the quoted items | **needs a yes** | receipt |
@@ -120,6 +128,18 @@ A tap on a card does not act; it sends a message into the conversation, so every
 and the confirmation. The evening card reads the household through the host every few seconds (read-only tools only),
 which is how it shows "Confirmed" or "Ordered" without a new card. See `web/view.js`, `web/host.js`, `src/mcp/views.js`.
 
+**The helper answers for themselves.** A pickup needs two people to agree: the parent who asks and the adult who
+goes. When the parent says yes, `ask_helper` returns a reply link with a random twelve-character code. The evening
+card draws it as a QR code (a 130-line encoder in `src/domain/qr.js`, no dependency, checked against a real scanner).
+The page behind it (`public/reply.html`) shows that one question and takes one answer; it cannot read the household
+and needs no account. The answer lands in the same server rule as `record_helper_reply`, so a "no" draws the plan
+again. Because it arrives outside the conversation, the display announces it, and the agent is told in a note
+before the person's next message. A helper who said yes can still drop out; a no is final for the day.
+Relay does not send the link in this demo: the display shows it, and the simulator puts Jo's phone beside it.
+See `src/http.js` (`/api/reply`), `src/domain/actions.js` (`answerRequest`).
+
+![Jo has been asked: the card shows a code, and Jo's phone shows what it opens](docs/screenshots/asked-with-code.jpg)
+
 **The agent follows an Agent Skill.** `skills/relay-home-evening/` is a skill in the agentskills.io layout
 (`SKILL.md` with front matter, plus references). The simulator's agent loads it as its instructions and reaches the
 household only through the MCP endpoint, over HTTP, with the visitor's own token. See `src/agent/`.
@@ -137,14 +157,14 @@ sealed household id; the page keeps it in the browser, so a reload or a second M
 ## Layout
 
 ```
-src/domain/     the household, the planner, the actions and their rules, the store
+src/domain/     the household, the planner, the actions and their rules, the store, the QR encoder
 src/mcp/        the MCP server (12 tools) and the ui:// views
 src/agent/      the agent loop, the skill loader, the scripted model, the hosted-model adapters
 src/http.js     /mcp behind bearer auth, the chat stream, the endpoints the page uses
 skills/         the Agent Skill
 web/            source of the card code and of the page's host code (bundled by `pnpm build`)
-public/         the simulator page
-test/           30 tests
+public/         the simulator page (the display) and reply.html (the helper's phone)
+test/           33 tests
 docs/           product feedback and friction log, submission text
 ```
 
@@ -155,7 +175,8 @@ docs/           product feedback and friction log, submission text
 - Not run on Alexa+. Whether Alexa+ renders MCP Apps views, answers `input_required`, or loads this skill the way the
   simulator does is unknown to us.
 - The household, calendar, travel times, shop and prices are fixed demo data. No calendar, messaging or shop service
-  is connected, and Relay never contacts the helper; someone has to tell it what the helper answered.
+  is connected. Relay makes the helper's reply link but does not send it: the display shows it as a code. Whoever
+  holds the link can answer that one request, and sees the child's first name, the place and the time.
 - The scripted model understands a limited set of sentences. The Gemini adapter has been run against the live
   service; the OpenAI-compatible adapter only against the wire format.
 - The bearer token is a signed household id for a demo, not an OAuth flow. Do not put real personal data in it.

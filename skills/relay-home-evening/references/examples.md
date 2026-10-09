@@ -14,7 +14,15 @@ Call `get_household`; then `find_pickup_helpers` and `suggest_dinners {budget: 8
 
 Call `ask_helper {name: "Jo"}`. The person confirms in their own app.
 
-> Relay: Jo has been asked. I will count the pickup as covered once Jo answers.
+> Relay: Jo has been asked. The code on the screen opens Jo's own reply link, and I will count the pickup as
+> covered once Jo answers.
+
+Jo opens the link and taps yes. The next thing you receive starts with
+`(Update from Relay Home, not said by the person: Jo confirmed. The pickup is covered.)`.
+
+> Person: Where are we?
+
+> Relay: Jo confirmed from their phone, so the pickup is covered. Dinner is the chickpea soup at 6:30.
 
 **2. The helper says no**
 

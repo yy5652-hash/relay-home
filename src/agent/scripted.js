@@ -115,7 +115,7 @@ export class ScriptedModel {
       if (seen.ask_helper.error) return { text: seen.ask_helper.summary };
       const missing = notes.plan?.dinner?.missing ?? [];
       notes.offer = missing.length ? { kind: 'order' } : null;
-      return { text: `${who} has been asked. I will count the pickup as covered once ${who} answers.` + (missing.length ? ` Shall I also order the ${missing.join(' and ')}?` : '') };
+      return { text: `${who} has been asked. The code on the screen opens ${who}'s own reply link, and I will count the pickup as covered once ${who} answers.` + (missing.length ? ` Shall I also order the ${missing.join(' and ')}?` : '') };
     }
 
     if (want.kind === 'order') {

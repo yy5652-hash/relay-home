@@ -13,7 +13,7 @@ import { newConversation, runTurn } from './agent/loop.js';
 import { ModelUnavailable, pickModel } from './agent/models.js';
 import { ScriptedModel } from './agent/scripted.js';
 import { loadSkill } from './agent/skill.js';
-import { seal, unseal } from './domain/actions.js';
+import { answerRequest, Refusal, requestByCode, seal, unseal } from './domain/actions.js';
 import { Homes } from './domain/store.js';
 import { createRelayServer } from './mcp/server.js';
 
@@ -27,7 +27,9 @@ function loadSecret(dir) {
   return readFileSync(file, 'utf8').trim();
 }
 
-export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '.data'), host = '127.0.0.1', allowedHosts, model = pickModel() } = {}) {
+// `publicUrl` is the address other devices reach this server at (a helper's phone opening a reply link). Without
+// it, links are built on whatever address the request came in on.
+export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '.data'), host = '127.0.0.1', allowedHosts, model = pickModel(), publicUrl = process.env.RELAY_PUBLIC_URL ?? process.env.RENDER_EXTERNAL_URL } = {}) {
   const secret = loadSecret(dataDir);
   const homes = new Homes(join(dataDir, 'homes'));
   const app = createMcpExpressApp({ host, allowedHosts });
@@ -46,8 +48,16 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
 
   // One server per request, built for the household the token names. The handler speaks the 2026-07-28 revision
   // and still answers 2025-11-25 clients statelessly.
-  const mcp = toNodeHandler(createMcpHandler(ctx => createRelayServer({ homes, id: ctx.authInfo.extra.home, secret, canAsk: ctx.era === 'modern' })));
-  app.post('/mcp', requireBearerAuth({ verifier }), (req, res) => mcp(req, res, req.body));
+  const mcp = toNodeHandler(createMcpHandler(ctx => createRelayServer({ homes, id: ctx.authInfo.extra.home, secret, canAsk: ctx.era === 'modern', origin: ctx.authInfo.extra.origin })));
+  const origin = publicUrl?.replace(/\/$/, '');
+  // The simulator's agent reaches /mcp over loopback, so it names the address the page was opened at.
+  const seenFrom = req => {
+    if (origin) return origin;
+    const named = req.get('x-relay-origin') ?? '';
+    const local = ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress);
+    return local && /^https?:\/\/[\w.:-]+$/.test(named) ? named : `${req.protocol}://${req.get('host')}`;
+  };
+  app.post('/mcp', requireBearerAuth({ verifier }), (req, res) => { req.auth.extra.origin = seenFrom(req); return mcp(req, res, req.body); });
   app.all('/mcp', (req, res) => res.status(405).set('Allow', 'POST').json({ error: 'This server is stateless: use POST.' }));
 
   // The simulator page asks for a household of its own; the token it gets is the same one any MCP client can use.
@@ -69,7 +79,7 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
     const chat = chatOf(req.auth.extra.home);
     res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', 'x-accel-buffering': 'no' });
     const emit = event => res.write(`data: ${JSON.stringify(event)}\n\n`);
-    const client = new Client({ name: 'relay-alexa-simulator', version: '2.0.0' }, { capabilities: { elicitation: { form: {} } }, versionNegotiation: { mode: 'auto' } });
+    const client = new Client({ name: 'relay-alexa-simulator', version: '2.1.0' }, { capabilities: { elicitation: { form: {} } }, versionNegotiation: { mode: 'auto' } });
     // Relay's confirmation question travels to the page and waits there for a tap.
     client.setRequestHandler('elicitation/create', request => new Promise(resolve => {
       const id = randomUUID();
@@ -79,8 +89,11 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
     }));
     try {
       const address = req.socket.localPort;
-      await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${address}/mcp`), { requestInit: { headers: { Authorization: `Bearer ${req.auth.token}` } } }));
+      await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${address}/mcp`), { requestInit: { headers: { Authorization: `Bearer ${req.auth.token}`, 'x-relay-origin': `${req.protocol}://${req.get('host')}` } } }));
       emit({ type: 'connected', protocol: client.getNegotiatedProtocolVersion(), server: client.getServerVersion()?.name, model: model.name, skill: skill.name });
+      // A helper may have answered through their link since the person last spoke; the agent is told before it reads the new message.
+      const log = homes.read(req.auth.extra.home).log;
+      for (const entry of log.slice(chat.seen ?? log.length)) if (entry.announce) chat.conversation.messages.push({ role: 'note', text: `(Update from Relay Home, not said by the person: ${entry.announce})` });
       const mark = chat.conversation.messages.length;
       try { await runTurn({ client, model, skill, conversation: chat.conversation, text, emit }); } catch (error) {
         if (!standIn || !(error instanceof ModelUnavailable)) throw error;
@@ -91,6 +104,7 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
     } catch (error) {
       emit({ type: 'say', text: `Something went wrong on my side: ${error.message}` });
     } finally {
+      chat.seen = homes.read(req.auth.extra.home).log.length;
       emit({ type: 'done' });
       res.end();
       await client.close().catch(() => {});
@@ -99,7 +113,7 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
   // The page is the MCP Apps host. What a card needs from the MCP server (its ui:// resource, a read-only tool call)
   // is fetched here with the visitor's own token, exactly as any other client would.
   const asClient = async (req, work) => {
-    const client = new Client({ name: 'relay-simulator-host', version: '2.0.0' }, { versionNegotiation: { mode: 'auto' } });
+    const client = new Client({ name: 'relay-simulator-host', version: '2.1.0' }, { versionNegotiation: { mode: 'auto' } });
     try {
       await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${req.socket.localPort}/mcp`), { requestInit: { headers: { Authorization: `Bearer ${req.auth.token}` } } }));
       return await work(client);
@@ -123,7 +137,7 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
   // The household panel beside the conversation reads the same state the tools work on.
   app.get('/api/home', requireBearerAuth({ verifier }), (req, res) => {
     const home = homes.read(req.auth.extra.home);
-    res.json({ event: home.event, child: home.child, people: home.people.map(person => ({ name: person.name, role: person.role, approved: person.approved, note: person.note })), pantry: home.pantry, memory: home.memory, requests: home.requests, orders: home.orders, log: home.log.slice(-10) });
+    res.json({ event: home.event, child: home.child, people: home.people.map(person => ({ name: person.name, role: person.role, approved: person.approved, note: person.note })), pantry: home.pantry, memory: home.memory, requests: home.requests, orders: home.orders, log: home.log.slice(-10), announcements: home.log.filter(entry => entry.announce).map(entry => entry.announce) });
   });
   app.post('/api/answer', requireBearerAuth({ verifier }), (req, res) => {
     const resolve = chatOf(req.auth.extra.home).waiting.get(String(req.body?.id));
@@ -132,7 +146,34 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
     res.json({ ok: true });
   });
   app.post('/api/reset', requireBearerAuth({ verifier }), (req, res) => { homes.reset(req.auth.extra.home); chats.delete(req.auth.extra.home); res.json({ ok: true }); });
-  app.get('/api/health', (req, res) => res.json({ ok: true, name: 'relay-home', version: '2.0.0' }));
+  app.get('/api/health', (req, res) => res.json({ ok: true, name: 'relay-home', version: '2.1.0' }));
+
+  // The helper's side. A reply link carries a random code and nothing else: it shows the one question that was
+  // asked and takes one answer. It cannot read the household or do anything else, and needs no account.
+  const asked = code => {
+    const home = /^[\w-]{12}$/.test(code) ? homes.whose(code) : null;
+    const request = home && requestByCode(homes.read(home), code);
+    return request ? { home, request } : null;
+  };
+  const question = (home, request) => ({ helper: request.name, child: home.child, where: request.where, by: request.by, from: home.people.filter(person => person.role === 'Parent').map(person => person.name).join(' and '), status: request.status });
+  app.get('/api/reply/:code', (req, res) => {
+    const found = asked(req.params.code);
+    if (!found) return res.status(404).json({ error: 'This link is not known. Ask the family to send it again.' });
+    res.json(question(homes.read(found.home), found.request));
+  });
+  app.post('/api/reply/:code', (req, res) => {
+    const found = asked(req.params.code);
+    if (!found) return res.status(404).json({ error: 'This link is not known. Ask the family to send it again.' });
+    if (typeof req.body?.accepted !== 'boolean') return res.status(400).json({ error: 'Answer yes or no.' });
+    try {
+      const { request } = homes.update(found.home, home => answerRequest(home, found.request.id, req.body.accepted, { via: 'link' }));
+      res.json(question(homes.read(found.home), request));
+    } catch (error) {
+      if (!(error instanceof Refusal)) throw error;
+      res.status(409).json({ error: error.message, ...question(homes.read(found.home), requestByCode(homes.read(found.home), req.params.code)) });
+    }
+  });
+  app.get('/r/:code', (req, res) => res.sendFile(join(ROOT, 'public', 'reply.html')));
 
   app.use(express.static(join(ROOT, 'public')));
   return { app, homes, secret, issue };

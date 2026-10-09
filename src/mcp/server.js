@@ -5,7 +5,7 @@ import { acceptedContent, inputRequired, McpServer } from '@modelcontextprotocol
 import * as z from 'zod';
 import { clock, GROCER, money } from '../domain/household.js';
 import { dinnerOptions, pickupOptions, planNow } from '../domain/planner.js';
-import { cancelOrder, placeOrder, quoteGroceries, readQuote, recordReply, Refusal, remember, requestPickup, savePlan, seal, unseal, withdrawRequest } from '../domain/actions.js';
+import { answerRequest, cancelOrder, placeOrder, quoteGroceries, readQuote, Refusal, remember, requestPickup, savePlan, seal, unseal, withdrawRequest } from '../domain/actions.js';
 import { VIEWS, viewMeta } from './views.js';
 
 const READ = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
@@ -17,8 +17,9 @@ const reply = (text, data) => ({ content: [{ type: 'text', text }], structuredCo
 const refuse = text => ({ content: [{ type: 'text', text }], isError: true });
 
 // `canAsk` is false when the connection cannot carry a question back to the person (a stateless 2025-11-25 request).
-export function createRelayServer({ homes, id, secret, canAsk = true }) {
-  const server = new McpServer({ name: 'relay-home', title: 'Relay Home', version: '2.0.0' }, {
+// `origin` is the address a helper's phone can reach this server at; reply links are built on it.
+export function createRelayServer({ homes, id, secret, canAsk = true, origin = '' }) {
+  const server = new McpServer({ name: 'relay-home', title: 'Relay Home', version: '2.1.0' }, {
     instructions: 'Relay Home rebuilds a family evening after a change of plan. Read first, draft a plan, then ask before anything is requested from a person or bought. A pickup is never "covered" until the helper has confirmed.'
   });
   const read = () => homes.read(id);
@@ -46,8 +47,9 @@ export function createRelayServer({ homes, id, secret, canAsk = true }) {
   // Everything Relay does on someone's behalf, shared by both confirmation paths. Nothing here runs without a yes.
   const perform = state => {
     if (state.do === 'ask') {
-      const request = change(draft => requestPickup(draft, state.name));
-      return reply(`Confirmed and done: ${request.name} has been asked. The pickup is not covered until ${request.name} confirms.`, { done: true, request, plan: planNow(read()) });
+      const request = change(draft => requestPickup(draft, state.name, { origin }));
+      homes.link(request.code, id);
+      return reply(`Confirmed and done: the request to ${request.name} is recorded, with a private reply link that only answers this one question (replyUrl). Relay does not send it in this demo: the screen shows it as a code for ${request.name}'s phone. The pickup is not covered until ${request.name} confirms.`, { done: true, request, plan: planNow(read()) });
     }
     if (state.do === 'withdraw') {
       const request = change(home => withdrawRequest(home, state.requestId));
@@ -111,7 +113,7 @@ export function createRelayServer({ homes, id, secret, canAsk = true }) {
 
   server.registerTool('ask_helper', {
     title: 'Ask someone to do the pickup', annotations: ACT, _meta: viewMeta('plan'),
-    description: 'Records that the household asks this person to collect the child. Call it only when the person\'s latest message asks to contact this helper or agrees to your offer to; a request about dinner or groceries is not that. Needs a yes from the person using Relay. The pickup stays "awaiting reply" until record_helper_reply is called; Relay does not contact anyone itself in this demo.',
+    description: 'Records that the household asks this person to collect the child and makes a private reply link for them. Call it only when the person\'s latest message asks to contact this helper or agrees to your offer to; a request about dinner or groceries is not that. Needs a yes from the person using Relay. The pickup stays "awaiting reply" until the helper answers through the link or record_helper_reply is called; Relay does not send the link itself in this demo.',
     inputSchema: z.object({ name: z.string().describe('An eligible person from find_pickup_helpers') })
   }, guarded(({ name }, ctx) => {
     const home = read();
@@ -123,17 +125,11 @@ export function createRelayServer({ homes, id, secret, canAsk = true }) {
 
   server.registerTool('record_helper_reply', {
     title: 'Record the helper\'s answer', annotations: DRAFT, _meta: viewMeta('plan'),
-    description: 'Stores what the helper answered, including a helper who had confirmed and now drops out. Call it only when the person\'s latest message tells you what the helper said. After a "no" that person is left out for today and the stored plan is drawn again; the result carries the new plan.',
+    description: 'Stores what the helper answered when the household passes it on, including a helper who had confirmed and now drops out. Call it only when the person\'s latest message tells you what the helper said; a helper who answers through their reply link needs no call. After a "no" that person is left out for today and the stored plan is drawn again; the result carries the new plan.',
     inputSchema: z.object({ requestId: z.string(), accepted: z.boolean() })
   }, guarded(({ requestId, accepted }) => {
-    // After a "no" the stored draft would still name that person, so the server draws it again with the same limits.
-    const request = change(home => {
-      const answered = recordReply(home, requestId, accepted);
-      if (!accepted && home.plan) savePlan(home, Object.fromEntries(Object.entries(home.plan.constraints).filter(([, value]) => value != null && !(Array.isArray(value) && !value.length))));
-      return answered;
-    });
-    const plan = planNow(read());
-    return reply(accepted ? `${request.name} confirmed. Pickup is covered.` : `${request.name} cannot do it and is left out for today.${plan ? ` The plan was drawn again: ${plan.summary}` : ''}`, { request, plan });
+    const { request, outcome } = change(home => answerRequest(home, requestId, accepted));
+    return reply(outcome, { request, plan: planNow(read()) });
   }));
 
   server.registerTool('withdraw_pickup_request', {

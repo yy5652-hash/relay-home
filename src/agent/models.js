@@ -21,7 +21,7 @@ export class OpenAICompatModel {
   async next({ instructions, tools, conversation }) {
     const messages = [{ role: 'system', content: instructions }];
     for (const message of conversation.messages) {
-      if (message.role === 'user') messages.push({ role: 'user', content: message.text });
+      if (message.role === 'user' || message.role === 'note') messages.push({ role: 'user', content: message.text });
       else if (message.role === 'assistant' && message.calls) messages.push({ role: 'assistant', content: null, tool_calls: message.calls.map(call => ({ id: call.id, type: 'function', function: { name: call.name, arguments: JSON.stringify(call.args) } })) });
       else if (message.role === 'assistant') messages.push({ role: 'assistant', content: message.text });
       else for (const result of message.results) messages.push({ role: 'tool', tool_call_id: result.id, content: JSON.stringify({ summary: result.summary, data: result.data, error: result.error }) });
@@ -40,7 +40,7 @@ export class GeminiModel {
   async next({ instructions, tools, conversation }) {
     const contents = [];
     for (const message of conversation.messages) {
-      if (message.role === 'user') contents.push({ role: 'user', parts: [{ text: message.text }] });
+      if (message.role === 'user' || message.role === 'note') contents.push({ role: 'user', parts: [{ text: message.text }] });
       // The model's own parts are sent back unchanged: newer Gemini models reject a tool turn without their signatures.
       else if (message.role === 'assistant' && message.calls) contents.push({ role: 'model', parts: message.raw ?? message.calls.map(call => ({ functionCall: { name: call.name, args: call.args } })) });
       else if (message.role === 'assistant') contents.push({ role: 'model', parts: [{ text: message.text }] });

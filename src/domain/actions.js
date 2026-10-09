@@ -1,5 +1,5 @@
 // Everything that changes the household or spends money. Each function either succeeds completely or throws a Refusal.
-import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomBytes, randomUUID, timingSafeEqual } from 'node:crypto';
 import { clock, GROCER, money } from './household.js';
 import { drawPlan, pickupOptions } from './planner.js';
 
@@ -90,13 +90,16 @@ export function cancelOrder(home, id) {
 }
 
 // Records that the household asked someone to collect the child. Relay never treats this as "pickup is covered".
-export function requestPickup(home, name) {
+// `origin` is where this server can be reached from the helper's phone; the request then carries a private link
+// that lets the helper, and only the helper, answer this one question.
+export function requestPickup(home, name, { origin } = {}) {
   const person = pickupOptions(home).find(option => option.name.toLowerCase() === String(name).toLowerCase());
   if (!person) throw new Refusal(`Relay does not know anyone called ${name}.`);
   if (!person.eligible) throw new Refusal(`${person.name} cannot be asked: ${person.reasons.map(reason => reason[0].toLowerCase() + reason.slice(1)).join('; ')}.`);
   const open = home.requests.find(request => request.status === 'awaiting reply');
   if (open) throw new Refusal(`${open.name} has already been asked and has not answered. Record their answer or withdraw that request first.`);
-  const request = { id: 'P-' + randomUUID().slice(0, 8).toUpperCase(), name: person.name, by: clock(home.pickup.deadline), where: home.pickup.location, status: 'awaiting reply', askedAt: new Date().toISOString() };
+  const code = randomBytes(9).toString('base64url');
+  const request = { id: 'P-' + randomUUID().slice(0, 8).toUpperCase(), name: person.name, by: clock(home.pickup.deadline), where: home.pickup.location, status: 'awaiting reply', askedAt: new Date().toISOString(), code, replyUrl: `${origin ?? ''}/r/${code}` };
   home.requests.push(request);
   note(home, `Asked ${person.name} to collect ${home.child} at ${request.where} by ${request.by}. Waiting for their answer.`, 'pickup');
   return request;
@@ -118,6 +121,24 @@ export function recordReply(home, id, accepted) {
   note(home, accepted ? `${request.name} confirmed the pickup.` : `${request.name} cannot do it. They are left out of new plans for today.`, 'pickup');
   return request;
 }
+
+// The helper's answer, from either side: told to Relay by the household, or given by the helper through their link
+// (`via: 'link'`). After a "no" the stored draft would still name that person, so it is drawn again with the same
+// limits. Returns the request and one sentence that says where the evening stands now.
+export function answerRequest(home, id, accepted, { via = 'household' } = {}) {
+  const request = recordReply(home, id, accepted);
+  request.via = via;
+  request.answeredAt = new Date().toISOString();
+  if (!accepted && home.plan) savePlan(home, Object.fromEntries(Object.entries(home.plan.constraints).filter(([, value]) => value != null && !(Array.isArray(value) && !value.length))));
+  const next = home.plan?.pickup;
+  const outcome = accepted ? `${request.name} confirmed. The pickup is covered.`
+    : `${request.name} cannot do it and is left out for today. ` + (!home.plan ? 'Nobody is covering the pickup.' : next ? `${next.who} is on the school list and could be there by ${next.arrivesLabel}; nobody has asked ${next.who} yet.` : home.plan.blockers[0]);
+  // An answer that arrives through the link happens outside the conversation, so the screen has to announce it.
+  if (via === 'link') Object.assign(home.log.at(-1), { via, announce: outcome });
+  return { request, outcome };
+}
+
+export const requestByCode = (home, code) => home.requests.find(request => request.code === code) ?? null;
 
 export function withdrawRequest(home, id) {
   const request = home.requests.find(item => item.id === id);

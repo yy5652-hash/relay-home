@@ -1,6 +1,6 @@
 {
   "name": "relay-home",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "private": true,
   "type": "module",
   "description": "Relay Home: a consent-first household agent for Alexa+. A Streamable HTTP MCP server with MCP Apps views, an Agent Skill and a simulated Alexa+ host.",

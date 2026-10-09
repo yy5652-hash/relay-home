@@ -6,8 +6,8 @@
 | `find_pickup_helpers` | no | Every known adult with `eligible` and the reasons; `exclude` leaves people out |
 | `suggest_dinners` | no | Meals ranked by pantry coverage within `budget`, `maxMinutes`, the diet and the weekly cap |
 | `draft_evening_plan` | stores a draft | Pickup and dinner in one plan with a summary and any blockers |
-| `ask_helper` | yes, after a yes | Records the request to an eligible helper; status `awaiting reply` |
-| `record_helper_reply` | yes | `accepted: true` covers the pickup; `false` leaves that person out of new plans today |
+| `ask_helper` | yes, after a yes | Records the request to an eligible helper and returns `replyUrl`, a private link the helper can answer through; status `awaiting reply` |
+| `record_helper_reply` | yes | For an answer the household passes on (a helper who uses their link needs no call). `accepted: true` covers the pickup; `false` leaves that person out of new plans today |
 | `withdraw_pickup_request` | yes, after the person's yes | Takes back an unanswered request |
 | `quote_groceries` | no | Price, slot and a `quoteToken` valid for ten minutes |
 | `place_grocery_order` | yes, after a yes | Buys exactly the quoted items; refuses over the weekly cap; same `orderKey` returns the same order |

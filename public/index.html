@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Relay Home</title>
+<title>Relay Home · a household agent for Alexa+</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="top">
   <div>
     <h1>Relay Home</h1>
-    <p>A simulated Alexa+ experience. The household, the school and the shop are made up; the MCP server, the Agent Skill and the cards are real.</p>
+    <p>A household agent for Alexa+, shown on a simulated kitchen display. The family, the school and the shop are made up; the MCP server, the Agent Skill and the cards are real.</p>
   </div>
   <div class="facts">
     <span id="protocol" title="Negotiated protocol revision">MCP</span>
@@ -20,40 +20,57 @@
   </div>
 </header>
 <main>
-  <section class="pane" aria-label="Conversation">
-    <p class="notice"><strong>4:40 PM</strong> <span id="notice"></span></p>
-    <div id="talk" class="talk" aria-live="polite"></div>
-    <div class="chips">
-      <button type="button" data-say="School moved Mia's pickup to 5:15 and Alex's train is late. Keep dinner under $8.">The pickup moved</button>
-      <button type="button" data-say="Make the pasta and order what we need.">Pasta, and order it</button>
-      <button type="button" data-say="What do you remember?">What do you remember?</button>
+  <section class="device" aria-label="Kitchen display (simulated)">
+    <div class="display">
+      <div class="ambient">
+        <span class="clock">4:40 PM</span>
+        <span class="day">Thursday 22 October · Kitchen</span>
+        <label class="voice" title="Relay speaks its answers and listens for yes or no"><input id="voice" type="checkbox"> <span>Voice</span></label>
+      </div>
+      <p class="notice"><span class="bell" aria-hidden="true"></span><span><strong>Oakfield School</strong> <span id="notice"></span></span></p>
+      <div class="zones">
+        <div class="voicezone">
+          <div id="talk" class="talk" aria-live="polite"><p class="hint">Say what changed, or tap a suggestion.</p></div>
+          <div class="chips">
+            <button type="button" data-say="School moved Mia's pickup to 5:15 and Alex's train is late. Keep dinner under $8.">The pickup moved</button>
+            <button type="button" data-say="Make the pasta and order what we need.">Pasta, and order it</button>
+            <button type="button" data-say="What do you remember?">What do you remember?</button>
+          </div>
+          <form id="form" class="composer">
+            <button id="mic" type="button" aria-label="Speak"><span></span></button>
+            <input id="say" autocomplete="off" placeholder="Say something to Relay" aria-label="Message">
+            <button type="submit">Send</button>
+          </form>
+        </div>
+        <div id="screen" class="screenzone" aria-label="On screen"><p class="empty">Relay's cards appear here. Each one is an MCP Apps view, delivered by the server as a <code>ui://</code> resource and shown in a sandboxed frame.</p></div>
+      </div>
+      <div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="question">
+        <div class="sheet-box">
+          <p class="quiet">Relay needs your yes before it does this</p>
+          <p id="question" class="question"></p>
+          <div class="sheet-actions"><button id="no" type="button">No</button><button id="yes" type="button" class="primary">Yes</button></div>
+          <p id="heard" class="quiet" hidden>Listening for yes or no…</p>
+        </div>
+      </div>
     </div>
-    <form id="form" class="composer">
-      <button id="mic" type="button" aria-label="Speak">●</button>
-      <input id="say" autocomplete="off" placeholder="Say something to Relay" aria-label="Message">
-      <button type="submit">Send</button>
-      <label class="voice"><input id="voice" type="checkbox"> Read answers aloud</label>
-    </form>
   </section>
-  <section class="pane screen" aria-label="On screen">
-    <h2>On screen</h2>
-    <div id="screen"><p class="empty quiet">Relay's cards appear here. Each one is an MCP Apps view delivered by the server as a <code>ui://</code> resource and shown in a sandboxed frame.</p></div>
-  </section>
-  <aside class="pane" aria-label="Inside the plan">
-    <h2>Inside the plan</h2>
-    <p class="quiet">Every call the agent makes to the MCP server at <code id="endpoint"></code>.</p>
-    <ol id="trace" class="trace"></ol>
-    <h2>The household</h2>
-    <div id="home"></div>
+  <aside class="side">
+    <section id="phone" class="phone" hidden aria-label="The helper's phone (simulated)">
+      <h2><span id="phone-who">The helper</span>'s phone</h2>
+      <div class="handset"><iframe id="phone-frame" title="The helper's reply link"></iframe></div>
+      <p class="quiet">The page behind the reply link, exactly as a real phone opens it from the code on the display. It can answer this one request and nothing else.</p>
+    </section>
+    <details class="pane" open>
+      <summary>Under the hood</summary>
+      <p class="quiet">Every call the agent makes to the MCP server at <code id="endpoint"></code>.</p>
+      <ol id="trace" class="trace"></ol>
+    </details>
+    <details class="pane" open>
+      <summary>The household</summary>
+      <div id="home"></div>
+    </details>
   </aside>
 </main>
-<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="question">
-  <div class="sheet-box">
-    <p class="quiet">Relay needs your yes before it does this</p>
-    <p id="question" class="question"></p>
-    <div class="sheet-actions"><button id="no" type="button">No</button><button id="yes" type="button" class="primary">Yes</button></div>
-  </div>
-</div>
 <script type="module" src="host.js"></script>
 </body>
 </html>

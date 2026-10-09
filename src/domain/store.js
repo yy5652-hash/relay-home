@@ -8,7 +8,18 @@ export class Homes {
     this.dir = dir;
     this.cache = new Map();
     mkdirSync(dir, { recursive: true });
+    try { this.links = JSON.parse(readFileSync(join(dir, 'links.json'), 'utf8')); } catch { this.links = {}; }
   }
+
+  // A helper's reply link carries only a random code; this is the one place that knows which household it belongs to.
+  link(code, id) {
+    this.links[code] = id;
+    const file = join(this.dir, 'links.json');
+    writeFileSync(`${file}.tmp`, JSON.stringify(this.links));
+    renameSync(`${file}.tmp`, file);
+  }
+
+  whose(code) { return Object.hasOwn(this.links, code) ? this.links[code] : null; }
 
   file(id) {
     if (!/^[a-z0-9-]{6,64}$/.test(id)) throw new Error('Invalid household id.');

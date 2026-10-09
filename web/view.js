@@ -1,10 +1,11 @@
 // The code inside every Relay Home card. It runs in the host's sandboxed frame, receives the tool result through the
 // MCP Apps bridge, draws it, and turns a tap into a message for the conversation (it never calls a tool on its own).
 import { App } from '@modelcontextprotocol/ext-apps';
+import { qrCode } from '../src/domain/qr.js';
 
 const kind = document.body.dataset.view;
 const root = document.getElementById('card');
-const app = new App({ name: `relay-home-${kind}`, version: '2.0.0' }, {}, { autoResize: true });
+const app = new App({ name: `relay-home-${kind}`, version: '2.1.0' }, {}, { autoResize: true });
 const money = amount => `$${Number(amount).toFixed(2)}`;
 const el = (tag, attrs = {}, ...children) => {
   const node = document.createElement(tag);
@@ -20,9 +21,25 @@ async function say(text, button) {
 }
 const chip = (text, tone) => el('span', { class: `chip ${tone}` }, text);
 
+// The helper's reply link as a code to scan. The card cannot open a link itself; it asks the host to.
+function replyCode(url, who) {
+  const rows = /^https?:/.test(url) ? qrCode(url) : null;
+  const open = el('button', {}, `Open ${who}'s link here`);
+  open.addEventListener('click', () => app.openLink({ url }).catch(() => {}));
+  if (!rows) return el('section', { class: 'tile reply' }, el('div', {}, el('h3', {}, `${who} answers for themselves`), el('p', { class: 'quiet' }, 'Relay made a private link that answers only this request.'), open));
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', `-2 -2 ${rows.length + 4} ${rows.length + 4}`);
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `Code for ${who}'s reply link`);
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', rows.map((row, y) => [...row].map((on, x) => (on === '1' ? `M${x} ${y}h1v1h-1z` : '')).join('')).join(''));
+  svg.append(path);
+  return el('section', { class: 'tile reply' }, el('div', { class: 'qr' }, svg), el('div', {}, el('h3', {}, `${who} answers for themselves`), el('p', {}, `Scan this with ${who}'s phone.`), el('p', { class: 'quiet' }, 'A private link that answers only this request. Relay does not send it in this demo.'), open));
+}
+
 const draw = {
   plan({ plan }) {
-    const asked = { 'awaiting reply': chip('Asked · waiting for an answer', 'wait'), confirmed: chip('Confirmed', 'ok'), declined: chip('Said no', 'no') }[plan.pickup?.status];
+    const asked = { 'awaiting reply': chip('Asked · waiting for an answer', 'wait'), confirmed: chip(plan.pickup?.answeredVia === 'link' ? 'Confirmed from their phone' : 'Confirmed', 'ok'), declined: chip('Said no', 'no') }[plan.pickup?.status];
     const order = plan.dinner?.order;
     const state = [plan.pickup && { 'awaiting reply': `${plan.pickup.who} asked`, confirmed: `${plan.pickup.who} confirmed`, declined: `${plan.pickup.who} said no` }[plan.pickup.status], order && 'groceries ordered'].filter(Boolean);
     const pickup = plan.pickup
@@ -34,7 +51,7 @@ const draw = {
     const actions = el('div', { class: 'actions' },
       plan.pickup && !asked && el('button', { class: 'primary', say: `Ask ${plan.pickup.who}` }, `Ask ${plan.pickup.who}`),
       plan.dinner?.missing.length && !order ? el('button', { say: 'Order the groceries' }, `Order for ${money(plan.dinner.cost)}`) : null);
-    return [el('header', {}, el('h2', {}, 'This evening'), el('span', { class: 'quiet' }, state.length ? state.join(' · ') : 'Draft · nothing has been asked or bought')), el('div', { class: 'pair' }, pickup, dinner), actions];
+    return [el('header', {}, el('h2', {}, 'This evening'), el('span', { class: 'quiet' }, state.length ? state.join(' · ') : 'Draft · nothing has been asked or bought')), el('div', { class: 'pair' }, pickup, dinner), plan.pickup?.replyUrl && replyCode(plan.pickup.replyUrl, plan.pickup.who), actions];
   },
   helpers({ options }) {
     return [el('header', {}, el('h2', {}, 'Who can collect Mia')), el('div', { class: 'row' }, options.map(person => el('section', { class: `tile slim ${person.eligible ? '' : 'dim'}` },

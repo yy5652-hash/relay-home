@@ -1,4 +1,4 @@
-# Submission text (Relay Home 2.0)
+# Submission text (Relay Home 2.1)
 
 Track: **Alexa+** (self-hosted MCP server and Agent Skill, shown through a simulated Alexa+ experience).
 
@@ -20,8 +20,11 @@ You tell Relay what changed. It reads the household, checks in parallel who may 
 fit, and drafts one plan. On a screen it shows that plan as cards: who can be asked and why the others cannot, the
 dinner options with what is already at home, the evening at a glance.
 
-Then it asks. "Ask Jo to collect Mia at Oakfield School, main gate by 5:15 PM?" Only a yes sends the request, and the
-pickup stays "awaiting reply" until Jo answers; Relay never calls it covered before that. If dinner needs something,
+Then it asks. "Ask Jo to collect Mia at Oakfield School, main gate by 5:15 PM?" Only a yes records the request, and
+the pickup stays "awaiting reply" until Jo answers; Relay never calls it covered before that. Jo answers for
+themselves: the display shows a code, Jo's phone opens a page that holds that one question, and a tap on "Yes, I
+will be there" turns the card on the family's display to "Confirmed from their phone". Two people have to agree to
+a pickup, and each of them says so on their own device. If dinner needs something,
 Relay gets a price from the shop, asks you to confirm the exact total, and places the order once, inside the weekly
 grocery cap you set. Say no and nothing happens. If the helper declines and nobody else on the school list can make
 it, the plan stops and names no one; it will not suggest the neighbour who lives closer but is not on the list.
@@ -29,7 +32,8 @@ it, the plan stops and names no one; it will not suggest the neighbour who lives
 The household is remembered between sessions, and any MCP client that connects with the same token sees the same
 evening.
 
-The household, the school notice and the shop are simulated, no message is sent and no money moves. The Alexa+
+The household, the school notice and the shop are simulated, no message is sent (the reply link is shown, not
+delivered) and no money moves. The Alexa+
 preview tools are not open to participants, so this runs in a browser page that stands in for Alexa+, as the FAQ allows.
 
 ## How we built it
@@ -43,6 +47,10 @@ preview tools are not open to participants, so this runs in a browser page that 
 - **Purchasing with guard rails.** A quote is signed by the server (HMAC) and valid for ten minutes; an order must
   match it to the cent, fit the weekly cap, and carries an idempotency key so a retry never buys twice. Orders can be
   cancelled and the amount returns to the cap.
+- **The helper's reply link.** `ask_helper` returns a link with a random code. The evening card draws it as a QR
+  code with a small encoder of our own (no dependency, checked against a real scanner). The page behind it shows
+  one question and takes one answer; it cannot read the household. The answer goes through the same server rule
+  as when the family passes it on, the display announces it, and the agent is told before the next message.
 - **MCP Apps views.** Four `ui://` cards (evening, helpers, dinners, receipt). Our page is a real MCP Apps host: it
   reads each view from the server, shows it in a sandboxed frame through `AppBridge`, and forwards only read-only
   tool calls from a card. A tap on a card sends a message into the conversation instead of acting, so every action
@@ -53,20 +61,22 @@ preview tools are not open to participants, so this runs in a browser page that 
   Flash-Lite following the skill. Without a key a built-in scripted model takes its place, so the project still runs
   out of the box and behaves the same every time; an adapter for any OpenAI-compatible service is included too.
 - **Rules in the server.** Every rule above is enforced by the server and covered by tests, so an agent that
-  ignores the skill still cannot get past them. 30 tests: the rules, the server in memory, the real HTTP endpoint on
-  both protocol revisions, the agent, the model adapters.
+  ignores the skill still cannot get past them. 33 tests: the rules, the server in memory, the real HTTP endpoint on
+  both protocol revisions, the helper's link, the agent, the model adapters.
 
 ## Challenges
 
 We could not test on Alexa+, so we do not know how it answers `input_required`, renders views or loads a skill. We
 built for both protocol revisions and kept every rule in the server for that reason. The most instructive bug was
 ours: a declined confirmation was asked again eight times, because our handler only recognised a yes. The details
-of this and eleven other rough edges are in `docs/product-feedback.md`.
+of this and thirteen other rough edges are in `docs/product-feedback.md`. The one we could not solve inside the
+protocol: when the helper answers, a stateless server has no way to tell the host, so our page has to ask.
 
 ## Accomplishments we are proud of
 
-A consent flow that lives in the protocol rather than beside it; cards that keep themselves current without being
-able to change anything; and a server whose rules hold no matter which model is driving.
+A consent flow that lives in the protocol rather than beside it, and that covers both people a pickup needs; cards
+that keep themselves current without being able to change anything; and a server whose rules hold no matter which
+model is driving.
 
 ## What we learned
 
@@ -77,7 +87,7 @@ by what it can do than by what it visibly will not do without asking.
 ## What's next
 
 Run it on Alexa+ when the tools are available. Replace the simulated services with real ones behind the same tools:
-a calendar, a messaging channel that lets the helper answer for themselves, a grocery partner. Test it with
+a calendar, a messaging channel that delivers the helper's reply link, a grocery partner. Test it with
 households, and measure whether a changed evening is actually repaired faster.
 
 ## Built with

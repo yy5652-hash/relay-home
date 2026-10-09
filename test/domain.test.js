@@ -107,3 +107,19 @@ test('a helper who confirmed can still drop out, and then nobody is named', () =
   assert.equal(plan.pickup, null);
   assert.match(plan.blockers[0], /Nobody on the school pickup list/);
 });
+
+test('a reply link becomes a QR code a phone can read', async () => {
+  const { qrCode } = await import('../src/domain/qr.js');
+  const { createHash } = await import('node:crypto');
+  const rows = qrCode('https://relay-home.onrender.com/r/lD49RGoYgWcQ');
+  assert.equal(rows.length, 29);                                            // version 3
+  assert.ok(rows.every(row => /^[01]{29}$/.test(row)));
+  for (const [x, y] of [[0, 0], [22, 0], [0, 22]]) {                        // a finder pattern in three corners
+    assert.deepEqual([0, 1, 2, 3, 4, 5, 6].map(line => rows[y + line].slice(x, x + 7)), ['1111111', '1000001', '1011101', '1011101', '1011101', '1000001', '1111111']);
+  }
+  // This exact symbol was read back with a phone-grade scanner (the browser's BarcodeDetector) when the encoder was
+  // written, as were symbols of every size it produces; the digest keeps a later change from breaking it unnoticed.
+  assert.equal(createHash('sha256').update(rows.join('\n')).digest('hex'), '10c9cc81b07448e0cfb07b5ad4257744e4b9899856889304c6875eb7279e13f3');
+  assert.equal(qrCode('x'.repeat(106)).length, 37);                         // version 5 is the largest
+  assert.equal(qrCode('x'.repeat(107)), null);
+});
