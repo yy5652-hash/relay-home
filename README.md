@@ -5,12 +5,15 @@ rebuilds an evening after a change of plan: it works out who is allowed and able
 that fits the pantry and the budget, and then asks before it requests anything from a person or spends any money.
 The adult it asks answers for themselves, on their own phone, through a link that can do nothing else.
 
-It is three things that work together:
+It is four things that work together:
 
 - a **self-hosted MCP server** over Streamable HTTP (protocol revision 2026-07-28, and still serving 2025-11-25 clients),
 - an **Agent Skill** that tells an agent how to use it,
 - a **simulated Alexa+ experience** in the browser: a kitchen display with voice, the server's **MCP Apps** cards on
-  its screen, the helper's phone beside it, and a panel that lists every MCP call the agent makes.
+  its screen, the helper's phone beside it, and a panel that lists every MCP call the agent makes,
+- a **second host built with the Strands Agents SDK** (AWS's open-source agent framework), in
+  [`integrations/strands/`](integrations/strands/): the same skill and server driven from a terminal, with the
+  confirmations answered through the protocol.
 
 > **What is real and what is not.** The MCP server, the protocol traffic, the confirmation flow, the cards and the
 > skill are real and run on your machine. The household, the school notice and the shop ("Corner Market") are made
@@ -68,6 +71,13 @@ reply links are built on; Render's own is used there). A free instance sleeps wh
 demo households start fresh after a restart. Without a model key the hosted page runs the scripted model; with
 `GEMINI_API_KEY` set as an environment variable it runs Gemini. Our own copy runs at <https://relay-home.onrender.com>
 with a Gemini key, and its MCP endpoint is `https://relay-home.onrender.com/mcp`.
+
+## Drive it from a Strands agent
+
+[`integrations/strands/relay_agent.py`](integrations/strands/relay_agent.py) connects a Strands agent (Python) to
+the same endpoint with the same Agent Skill. Strands negotiates the 2026-07-28 revision and drives Relay's
+`input_required` confirmations itself, through an elicitation callback that asks the person at the terminal.
+See [its README](integrations/strands/README.md) for how to run it and a recorded transcript.
 
 ## Connect your own MCP client
 
@@ -162,6 +172,7 @@ src/mcp/        the MCP server (12 tools) and the ui:// views
 src/agent/      the agent loop, the skill loader, the scripted model, the hosted-model adapters
 src/http.js     /mcp behind bearer auth, the chat stream, the endpoints the page uses
 skills/         the Agent Skill
+integrations/   a second host: the Strands agent (Python)
 web/            source of the card code and of the page's host code (bundled by `pnpm build`)
 public/         the simulator page (the display) and reply.html (the helper's phone)
 test/           33 tests

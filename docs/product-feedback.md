@@ -14,6 +14,8 @@ the section "What we could not test" lists what that leaves open.
 | MCP Apps (`@modelcontextprotocol/ext-apps`) | 2.0.3 (spec 2026-01-26) | `ui://` views, the `App` class inside cards, `AppBridge` in our host page |
 | Agent Skills format (agentskills.io) | as published | `skills/relay-home-evening/` |
 | Express, Zod, esbuild, Node.js test runner | 5.2.1, 4.6.5, 0.28.2, Node 24 | Routing, schemas, browser bundles, tests |
+| Strands Agents SDK (`strands-agents`, AWS) with its Gemini provider | 1.59.0 | A second host for the same server: `integrations/strands/` |
+| MCP Python SDK (`mcp`), as used by Strands | 2.1.1 | Streamable HTTP client, 2026-07-28 negotiation, elicitation callback |
 | Hackathon rules and FAQ | read 2026-10-07 | Track requirements, what a simulated experience may be |
 
 ## What worked well
@@ -169,6 +171,32 @@ individual problems, so no durations are given.
 - **Would help:** say in the MCP Apps overview that views cannot navigate and name `openLink`; recommend a default
   policy for hosts (same-origin only, or ask the person). Whether Alexa+ would open a link from a card at all, and on
   which device, is unknown to us. Severity: low.
+
+### 15. Strands: the server refuses to ask until the host passes an elicitation callback
+- **Doing:** connecting a Strands `MCPClient` to Relay and calling `ask_helper`, which returns `input_required`.
+- **Expected:** Strands' client (`mcp` 2.x) drives the multi-round-trip; the person is asked somehow.
+- **Happened:** the server answered `Cannot request input 'confirm' (elicitation/create): the request's client
+  capabilities do not declare the required capability`, and Strands reported "tool execution failed". The
+  capability is declared only when `MCPClient(..., elicitation_callback=...)` is given; nothing in the error
+  pointed at that argument. The model then told the person "Jo has been asked" (see 16).
+- **Workaround:** pass an `elicitation_callback` that puts `params.message` to the person and returns
+  `ElicitResult(action='accept', content={'confirm': True})` or `ElicitResult(action='decline')`. After that the
+  whole flow worked unchanged, including the decline branch.
+- **Would help:** in Strands, a line in the MCP tools guide that a 2026-07-28 server may ask for input and that
+  the callback is how a host answers; in the SDK error, name the capability and how clients declare it. The
+  error itself was correct and precise. Severity: medium.
+
+### 16. A small model reports the opposite of what the server said
+- **Doing:** the Strands host with Gemini 3.5 Flash-Lite, the person answering no to "Ask Jo ...?".
+- **Expected:** "Nothing was done."
+- **Happened:** the tool result said, in words, "The person was asked and answered no. Nothing was done"; the
+  model told the person "Jo is unable to collect Mia today". Earlier, after a failed tool call (entry 15), the same
+  model said "Jo has been asked to collect Mia". In both cases the household was untouched, because no action
+  runs on the model's say-so; the larger `gemini-3.5-flash` read both correctly but was rate-limited (503).
+- **What we did:** the host prints the server's own line for every action beside the model's reply, so the
+  transcript carries the fact; the rules stay in the server.
+- **Would help:** a host-level hook in Strands to attach a server's structured result (`done: false`) to the
+  model's final answer, or to require the model to quote it. Severity: medium for anything a person relies on.
 
 ## What we could not test
 

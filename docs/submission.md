@@ -51,6 +51,10 @@ preview tools are not open to participants, so this runs in a browser page that 
   code with a small encoder of our own (no dependency, checked against a real scanner). The page behind it shows
   one question and takes one answer; it cannot read the household. The answer goes through the same server rule
   as when the family passes it on, the display announces it, and the agent is told before the next message.
+- **A second host on the Strands Agents SDK** (AWS). `integrations/strands/relay_agent.py` drives the same server
+  and skill from a terminal; Strands negotiates 2026-07-28 and answers Relay's `input_required` confirmations
+  through an elicitation callback, so the person is asked in the protocol, not by the model. (AWS Builder mini
+  challenge; no Bedrock, as we have no AWS account.)
 - **MCP Apps views.** Four `ui://` cards (evening, helpers, dinners, receipt). Our page is a real MCP Apps host: it
   reads each view from the server, shows it in a sandboxed frame through `AppBridge`, and forwards only read-only
   tool calls from a card. A tap on a card sends a message into the conversation instead of acting, so every action
@@ -93,7 +97,7 @@ households, and measure whether a changed evening is actually repaired faster.
 ## Built with
 
 Node.js, TypeScript SDK for MCP (server, client, node, express packages), MCP Apps (`@modelcontextprotocol/ext-apps`),
-Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript.
+Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript; Python, Strands Agents SDK, MCP Python SDK (the second host).
 
 ## Notes for the form
 
@@ -101,4 +105,7 @@ Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript.
 - Video: https://youtu.be/W3LUTcaPIeE (public, 2:44; notes in `docs/demo-video.md`). Repository: https://github.com/yy5652-hash/relay-home (public, MIT).
 - Product feedback and friction log: `docs/product-feedback.md`.
 - AI coding assistance was used to write this project.
+- AWS Builder: Strands Agents SDK, documented in `integrations/strands/README.md`; Bedrock not run (no AWS account).
+- Open Source: a documentation and test fix to the MCP TypeScript SDK (the lead `input_required` example re-asked
+  after a decline, the bug behind friction log entry 1); URL in the form.
 - Not claimed: an Alexa+ integration, real services, user research. Only the Gemini adapter has been run live.
