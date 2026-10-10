@@ -63,3 +63,20 @@ announcements of what Jo did on their phone.
 **Relay:** Jo cannot do it and is left out for today. Nobody on the school pickup list can be there by 5:15 PM. Call the school or an approved adult; Relay will not suggest anyone else.
 
 Calls per turn: get_household, find_pickup_helpers, suggest_dinners, draft_evening_plan / ask_helper, confirmation / get_household, find_pickup_helpers, suggest_dinners, draft_evening_plan, quote_groceries, place_grocery_order, confirmation.
+
+## What was reused, and what was not
+
+Checked on 10 October 2026, before deciding whether to rebuild the film on a template.
+
+Reused in this film:
+- **Kokoro-82M** ([hexgrad/kokoro](https://github.com/hexgrad/kokoro), Apache-2.0, 9.2k stars): the narration voice, through `kokoro-onnx`; unchanged.
+- **Chromium's own screencast** (`Page.startScreencast` over the DevTools protocol, headless shell from Playwright's browser cache): the picture; frames carry their own timestamps, which is what keeps captions and the accent note on the clock.
+- **Our media kit from an earlier project** (`nw_media.py`, `build_music.py`: wav helpers, mixing with ducking, oscillator instruments and reverb): the quiet bed is one slow chord per bar and one plucked note built from those instruments; the EDM arrangement the kit ships was not used.
+- The recorder, the in-page overlay and the assembly script are the ones written for the 2.0 film, cut down (the counters, badges, stamps and gauge were removed for this edition).
+
+Looked at and not used, with the reason:
+- [zz41354899/SwiftClip](https://github.com/zz41354899/SwiftClip) (MIT, 32 Remotion templates in Apple light-mode style: Product Launch, Brand Reveal, Minimal Title, Metric Dashboard, End Screen) and [Curvable/motion](https://github.com/Curvable/motion) (MIT, 14 launch-video scenes): the closest thing to a ready-made keynote look for the three text cards. Not used this time because the film is dark and screen-recording-first, so each template would need restyling, and the cards are three lines of text; worth adopting for the next edition if the cards grow.
+- [yuxuant2025/vision-video-in-a-weekend](https://github.com/yuxuant2025/vision-video-in-a-weekend) (MIT, 248 stars): a recipe rather than a template; its "timing spine" (one table that places every voice line and every scene) is the same idea as our step list, and its script framework is for vision videos with talking heads, which this is not.
+- [AlexAnsart/demo-studio](https://github.com/AlexAnsart/demo-studio) (MIT): Playwright-driven narrated demos with smart zooms, ElevenLabs voice and Whisper alignment; the nearest open-source equivalent of our recorder. Not used because this film needs taps inside the helper's phone frame and the display's own announcements, which the skill does not drive, and because ElevenLabs is a paid service.
+- [remotion-dev/remotion](https://github.com/remotion-dev/remotion) (63k stars, source-available; free for individuals) and [motion-canvas/motion-canvas](https://github.com/motion-canvas/motion-canvas) (MIT, 19k): the frameworks the templates above are built on. A rebuild of the card and caption layer on Remotion with SwiftClip's Minimal Title and Brand Reveal is the recommended route for a fourth edition; the screencast would stay as it is, placed under it as a video layer.
+- [reactvideoeditor/remotion-templates](https://github.com/reactvideoeditor/remotion-templates) (81 templates): no licence file, so not reusable.
