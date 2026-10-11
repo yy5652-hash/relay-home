@@ -1,5 +1,5 @@
 1
-00:00:01,005 --> 00:00:04,695
+00:00:01,006 --> 00:00:04,696
 4:40. The school just moved Mia's pickup to 5:15.
 
 2
@@ -7,11 +7,11 @@
 Alex's train is late.
 
 3
-00:00:07,621 --> 00:00:10,136
+00:00:07,622 --> 00:00:10,137
 One change. The whole evening comes apart.
 
 4
-00:00:11,941 --> 00:00:15,409
+00:00:11,942 --> 00:00:15,410
 Relay Home rebuilds the evening. And it asks before it acts.
 
 5
@@ -19,61 +19,77 @@ Relay Home rebuilds the evening. And it asks before it acts.
 Say what changed.
 
 6
-00:00:19,770 --> 00:00:24,065
+00:00:19,777 --> 00:00:24,072
 Who can collect Mia. What dinner fits. One plan.
 
 7
-00:00:25,488 --> 00:00:29,394
+00:00:25,495 --> 00:00:29,401
 Every step: a real MCP call.
 
 8
-00:00:32,684 --> 00:00:37,841
-Not on the school list: never suggested.
+00:00:30,261 --> 00:00:31,828
+Four adults. One deadline.
 
 9
-00:00:40,745 --> 00:00:47,021
-Nothing happens without your yes.
+00:00:32,427 --> 00:00:37,624
+Not on the school list: never suggested.
 
 10
-00:00:48,442 --> 00:00:52,369
-Asked. Not covered until Jo answers.
+00:00:41,029 --> 00:00:47,305
+Nothing happens without your yes.
 
 11
-00:00:52,530 --> 00:00:56,663
-A private link, for this request only.
+00:00:48,717 --> 00:00:52,644
+Asked. Not covered until Jo answers.
 
 12
-00:00:59,771 --> 00:01:01,465
-Jo's phone. One question.
+00:00:52,806 --> 00:00:56,939
+A private link, for this request only.
 
 13
-00:01:05,404 --> 00:01:09,114
-Confirmed, from Jo's own phone.
+00:00:59,770 --> 00:01:01,464
+Jo's phone. One question.
 
 14
-00:01:11,191 --> 00:01:15,553
-The exact total. Nothing more.
+00:01:05,402 --> 00:01:09,112
+Confirmed, from Jo's own phone.
 
 15
-00:01:16,966 --> 00:01:19,050
-Once. Inside the weekly cap.
+00:01:11,183 --> 00:01:15,545
+The exact total. Nothing more.
 
 16
-00:01:20,475 --> 00:01:22,519
-Jo cannot make it.
+00:01:16,969 --> 00:01:19,053
+Once. Inside the weekly cap.
 
 17
-00:01:24,610 --> 00:01:30,359
-It stops. It names no one.
+00:01:20,476 --> 00:01:22,520
+Jo cannot make it.
 
 18
-00:01:31,683 --> 00:01:40,921
-A self-hosted MCP server. An Agent Skill. MCP Apps cards.
+00:01:24,614 --> 00:01:30,363
+It stops. It names no one.
 
 19
-00:01:41,222 --> 00:01:44,453
-The same server, from a Strands agent.
+00:01:31,094 --> 00:01:32,703
+The yes, on the wire.
 
 20
-00:01:47,271 --> 00:01:49,544
+00:01:33,003 --> 00:01:36,851
+The server asks. The answer is sealed to the question.
+
+21
+00:01:37,152 --> 00:01:39,581
+Jo's phone answers the server itself.
+
+22
+00:01:41,483 --> 00:01:44,731
+12 tools. 2 protocol revisions. 33 tests.
+
+23
+00:01:45,033 --> 00:01:48,037
+The same server, from a Strands agent.
+
+24
+00:01:51,079 --> 00:01:53,352
 Relay Home. It asks before it acts.
