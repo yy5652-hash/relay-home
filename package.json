@@ -11,7 +11,8 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env src/server.js",
     "build": "node scripts/build.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "wire": "node scripts/wire.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/client": "2.3.1",

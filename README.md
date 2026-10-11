@@ -22,7 +22,7 @@ It is four things that work together:
 
 **Try it in the browser:** <https://relay-home.onrender.com> (a free instance: the first load can take up to a minute
 while it wakes; the agent there is Gemini 3.5 Flash-Lite on a free quota, and the scripted model takes over when
-that quota is used up). **Demo video (2:44):** <https://youtu.be/W3LUTcaPIeE>. The file and its captions are on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media);
+that quota is used up). **Demo video:** <https://youtu.be/W3LUTcaPIeE> (the 2.0 film, 2:44). The 2.1 film (1:56, with the helper's phone and two figures drawn from the take's own data) is on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media) until it is published;
 [`docs/demo-video.md`](docs/demo-video.md) says how it was recorded and reproduces the conversation in it.
 
 ![The evening card after Jo has confirmed and the groceries are ordered](docs/screenshots/evening-ordered.jpg)
@@ -78,6 +78,31 @@ with a Gemini key, and its MCP endpoint is `https://relay-home.onrender.com/mcp`
 the same endpoint with the same Agent Skill. Strands negotiates the 2026-07-28 revision and drives Relay's
 `input_required` confirmations itself, through an elicitation callback that asks the person at the terminal.
 See [its README](integrations/strands/README.md) for how to run it and a recorded transcript.
+
+## See a yes on the wire
+
+`pnpm wire` (or `node scripts/wire.mjs`) starts a server with a throw-away household, asks Jo, and prints every HTTP
+exchange with `/mcp` on the way, with its timing. `pnpm wire no` shows the same with a person who declines.
+
+```
+── exchange 1 ── POST /mcp ── 200 in 4.8 ms
+→ {"method":"tools/call","name":"ask_helper","arguments":{"name":"Jo"}}
+← {"resultType":"input_required","inputRequests":{"confirm":{"method":"elicitation/create","message":"Ask Jo to collect Mia at Oakfield School, main gate by 5:15 PM?"}},"requestState":"eyJkbyI6ImFzayIsIm…(94 chars)"}
+
+   the person is asked: "Ask Jo to collect Mia at Oakfield School, main gate by 5:15 PM?"  →  yes
+
+── exchange 2 ── POST /mcp ── 200 in 3.4 ms
+→ {"method":"tools/call","name":"ask_helper","arguments":{"name":"Jo"},"inputResponses":{"confirm":{"action":"accept","content":{"confirm":true}}},"requestState":"eyJkbyI6ImFzayIsIm…(94 chars)"}
+← {"resultType":"complete","text":"Confirmed and done: the request to Jo is recorded, …","request":{"id":"P-5B78C254","name":"Jo","status":"awaiting reply","replyUrl":"http://127.0.0.1:51033/r/wAoGlWdFSQT8"},"done":true}
+
+── the helper's phone ── POST /api/reply/‹code› ── in 2.3 ms
+→ {"accepted":true}
+← {"helper":"Jo","child":"Mia","where":"Oakfield School, main gate","by":"5:15 PM","from":"Alex and Sam","status":"confirmed"}
+```
+
+The first call is not carried out: it comes back as a question and a sealed state. Only the second call, which
+carries the person's answer and that state, does anything. With "no", the second answer is `"done": false` and no
+request exists afterwards. The demo film draws this exchange as its second figure.
 
 ## Connect your own MCP client
 
@@ -176,6 +201,7 @@ integrations/   a second host: the Strands agent (Python)
 web/            source of the card code and of the page's host code (bundled by `pnpm build`)
 public/         the simulator page (the display) and reply.html (the helper's phone)
 test/           33 tests
+scripts/        the bundler, and `wire.mjs`: the consent round trip printed as it travels
 docs/           product feedback and friction log, submission text
 ```
 
