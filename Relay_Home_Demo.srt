@@ -1,13 +1,13 @@
 1
-00:00:01,006 --> 00:00:04,696
+00:00:01,004 --> 00:00:04,694
 4:40. The school just moved Mia's pickup to 5:15.
 
 2
-00:00:05,198 --> 00:00:06,771
+00:00:05,195 --> 00:00:06,768
 Alex's train is late.
 
 3
-00:00:07,622 --> 00:00:10,137
+00:00:07,620 --> 00:00:10,135
 One change. The whole evening comes apart.
 
 4
@@ -15,81 +15,81 @@ One change. The whole evening comes apart.
 Relay Home rebuilds the evening. And it asks before it acts.
 
 5
-00:00:17,814 --> 00:00:18,847
+00:00:17,816 --> 00:00:18,849
 Say what changed.
 
 6
-00:00:19,777 --> 00:00:24,072
+00:00:19,787 --> 00:00:24,082
 Who can collect Mia. What dinner fits. One plan.
 
 7
-00:00:25,495 --> 00:00:29,401
+00:00:25,503 --> 00:00:29,409
 Every step: a real MCP call.
 
 8
-00:00:30,261 --> 00:00:31,828
+00:00:32,551 --> 00:00:34,118
 Four adults. One deadline.
 
 9
-00:00:32,427 --> 00:00:37,624
+00:00:34,719 --> 00:00:39,916
 Not on the school list: never suggested.
 
 10
-00:00:41,029 --> 00:00:47,305
+00:00:43,009 --> 00:00:49,285
 Nothing happens without your yes.
 
 11
-00:00:48,717 --> 00:00:52,644
+00:00:50,703 --> 00:00:54,630
 Asked. Not covered until Jo answers.
 
 12
-00:00:52,806 --> 00:00:56,939
+00:00:54,791 --> 00:00:58,924
 A private link, for this request only.
 
 13
-00:00:59,770 --> 00:01:01,464
+00:01:01,676 --> 00:01:03,370
 Jo's phone. One question.
 
 14
-00:01:05,402 --> 00:01:09,112
+00:01:07,913 --> 00:01:11,623
 Confirmed, from Jo's own phone.
 
 15
-00:01:11,183 --> 00:01:15,545
+00:01:15,002 --> 00:01:19,364
 The exact total. Nothing more.
 
 16
-00:01:16,969 --> 00:01:19,053
+00:01:20,788 --> 00:01:22,872
 Once. Inside the weekly cap.
 
 17
-00:01:20,476 --> 00:01:22,520
+00:01:24,296 --> 00:01:26,340
 Jo cannot make it.
 
 18
-00:01:24,614 --> 00:01:30,363
+00:01:27,204 --> 00:01:32,953
 It stops. It names no one.
 
 19
-00:01:31,094 --> 00:01:32,703
+00:01:33,677 --> 00:01:35,286
 The yes, on the wire.
 
 20
-00:01:33,003 --> 00:01:36,851
+00:01:35,587 --> 00:01:39,435
 The server asks. The answer is sealed to the question.
 
 21
-00:01:37,152 --> 00:01:39,581
+00:01:39,737 --> 00:01:42,166
 Jo's phone answers the server itself.
 
 22
-00:01:41,483 --> 00:01:44,731
-12 tools. 2 protocol revisions. 33 tests.
+00:01:44,068 --> 00:01:47,391
+12 tools. 2 protocol revisions. 34 tests.
 
 23
-00:01:45,033 --> 00:01:48,037
+00:01:47,692 --> 00:01:50,696
 The same server, from a Strands agent.
 
 24
-00:01:51,079 --> 00:01:53,352
+00:01:52,984 --> 00:01:55,257
 Relay Home. It asks before it acts.
