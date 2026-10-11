@@ -1,4 +1,4 @@
-# Devpost form: the answers to paste (Relay Home 2.1)
+# Devpost form: the answers to paste (Relay Home 2.2)
 
 Prepared 9 October 2026 for the "Additional info" page of submission 1216490. Everything below is written to be
 pasted as is; the two URLs marked `‹›` are filled in once the open-source PR and the new video are public.
@@ -8,7 +8,7 @@ pasted as is; the two URLs marked `‹›` are filled in once the open-source PR
 - **Primary track:** Alexa+ (unchanged).
 - **Code repository:** https://github.com/yy5652-hash/relay-home (public, MIT, licence visible in About).
 - **New or existing:** New (started during the submission period). Not applicable: "what was updated".
-- **Video demo link:** `‹new YouTube URL›` (1:52; the file and captions are on the repository's `media` branch).
+- **Video demo link:** `‹new YouTube URL›` (1:58; the file and captions are on the repository's `media` branch).
 - **Project testing link:** https://relay-home.onrender.com (free instance; the first load can take a minute).
 
 ## AWS Builder Mini Challenge: Yes

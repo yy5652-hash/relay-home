@@ -22,7 +22,7 @@ It is four things that work together:
 
 **Try it in the browser:** <https://relay-home.onrender.com> (a free instance: the first load can take up to a minute
 while it wakes; the agent there is Gemini 3.5 Flash-Lite on a free quota, and the scripted model takes over when
-that quota is used up). **Demo video:** <https://youtu.be/W3LUTcaPIeE> (the 2.0 film, 2:44). The 2.1 film (1:56, with the helper's phone and two figures drawn from the take's own data) is on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media) until it is published;
+that quota is used up). **Demo video:** <https://youtu.be/W3LUTcaPIeE> (the 2.0 film, 2:44). The current film (1:58, on the 2.2 interface, with the helper's phone and the consent exchange drawn from the take's own data) is on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media) until it is published;
 [`docs/demo-video.md`](docs/demo-video.md) says how it was recorded and reproduces the conversation in it.
 
 ![The evening card after Jo has confirmed and the groceries are ordered](docs/screenshots/evening-ordered.jpg)
@@ -37,15 +37,20 @@ pnpm start
 ```
 
 Open <http://localhost:4317>. No key and no account are needed.
+The display starts at rest with tonight's three facts (the pickup, dinner, what is left of the
+grocery cap), read through `get_household`; the phone beside it is asleep.
+
+![The display at rest: tonight's pickup, dinner and grocery cap, with the helper's phone asleep beside it](docs/screenshots/at-rest.jpg)
 
 Then try this, in order:
 
 1. Click **The pickup moved**. Relay reads the household, checks helpers and dinners in parallel, and drafts a plan.
-   Three cards appear on the screen; the panel on the right shows the four MCP calls behind them.
+   Three cards appear on the screen; *Under the hood*, below the display, lists the four MCP calls behind them.
+   Scroll the cards: *Who can collect Mia* draws every adult's arrival against the 5:15 deadline, to scale.
 2. Click **Ask Jo** inside the card. Relay's question covers the display. Say **Yes**.
    The card now reads "Asked · waiting for an answer" and shows a code for Jo's phone; Relay does not call the
    pickup covered.
-3. *Jo's phone* has appeared beside the display, showing what the code opens. Tap **Yes, I will be there** on it
+3. The phone beside the display has woken as *Jo's phone*, showing what the code opens. Tap **Yes, I will be there** on it
    (you are playing Jo; on the hosted copy you can scan the code with a real phone instead). Within a few seconds
    the display says "Just in · Jo confirmed" and the card changes to "Confirmed from their phone".
 4. Click **Pasta, and order it**. Relay prices the missing spinach, asks you to confirm $3.20, and places the order.
@@ -59,7 +64,7 @@ confirmation by saying yes or no; say "No" on a confirmation sheet (nothing happ
 "Jo can't make it" (Jo is left out, and with nobody else eligible the plan is blocked and names no one);
 "Keep dinner under $2 and 20 minutes"; "Set the weekly cap to $22" and then try to order.
 
-Run the tests with `pnpm test` (33 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
+Run the tests with `pnpm test` (34 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
 revisions, the helper's reply link, the agent, the model adapters).
 
 ## Host it
@@ -163,6 +168,15 @@ A tap on a card does not act; it sends a message into the conversation, so every
 and the confirmation. The evening card reads the household through the host every few seconds (read-only tools only),
 which is how it shows "Confirmed" or "Ordered" without a new card. See `web/view.js`, `web/host.js`, `src/mcp/views.js`.
 
+![Who can collect Mia: four adults drawn against the 5:15 deadline](docs/screenshots/who-can-collect.jpg)
+
+**A card shows the rule, not only the result.** The helpers card draws each adult's arrival on one time axis with
+the deadline as a line, so "Lee would be first but is not on the school's list" and "Sam is five minutes late" are
+visible at a glance; the data is the tool's own `structuredContent`. Cards carry no look of their own beyond a
+fallback: they read the MCP Apps host style variables (`--color-background-primary`, `--font-sans`,
+`--border-radius-md` and the rest) that the host passes in `hostContext.styles.variables`, so the same card sits
+natively in the simulator's dark display and falls back to its own light or dark palette in any other host.
+
 **The helper answers for themselves.** A pickup needs two people to agree: the parent who asks and the adult who
 goes. When the parent says yes, `ask_helper` returns a reply link with a random twelve-character code. The evening
 card draws it as a QR code (a 130-line encoder in `src/domain/qr.js`, no dependency, checked against a real scanner).
@@ -199,8 +213,8 @@ src/http.js     /mcp behind bearer auth, the chat stream, the endpoints the page
 skills/         the Agent Skill
 integrations/   a second host: the Strands agent (Python)
 web/            source of the card code and of the page's host code (bundled by `pnpm build`)
-public/         the simulator page (the display) and reply.html (the helper's phone)
-test/           33 tests
+public/         the simulator page (the display, the phone beside it) and reply.html (the helper's page)
+test/           34 tests
 scripts/        the bundler, and `wire.mjs`: the consent round trip printed as it travels
 docs/           product feedback and friction log, submission text
 ```
@@ -222,4 +236,6 @@ docs/           product feedback and friction log, submission text
 ## Licence
 
 MIT. Dependencies: the MCP TypeScript SDK packages and `@modelcontextprotocol/ext-apps` (MIT), Express (MIT), Zod (MIT).
+The interface reuses Radix Colors (MIT), Lucide icons (ISC), Open Props easings (MIT) and the Devices.css phone frame
+(MIT), copied in as values with nothing loaded at run time; see [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 AI coding assistance was used to write this project.

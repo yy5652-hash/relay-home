@@ -33,6 +33,21 @@ test('the server lists its tools, the views they render and the UI resources', a
   assert.equal(view.contents[0].mimeType, 'text/html;profile=mcp-app');
 });
 
+test('the helpers answer carries what a card needs to draw every arrival against the deadline', async () => {
+  const { call } = await connect();
+  const { options, child, by, deadline, now } = (await call('find_pickup_helpers')).structuredContent;
+  assert.equal(child, 'Mia');
+  assert.equal(by, '5:15 PM');
+  assert.ok(now < deadline);
+  for (const option of options) assert.equal(typeof option.arrives, 'number');
+  const lee = options.find(option => option.name === 'Lee'), jo = options.find(option => option.name === 'Jo');
+  // The rule the card exists to show: arriving first is not enough, the school's list decides.
+  assert.ok(lee.arrives < jo.arrives && lee.arrives <= deadline);
+  assert.equal(lee.eligible, false);
+  assert.equal(jo.eligible, true);
+  assert.deepEqual(options.filter(option => option.arrives > deadline).map(option => option.name).sort(), ['Alex', 'Sam']);
+});
+
 test('a plan can be drafted, and buying asks the person before anything is ordered', async () => {
   const { call, asked, homes } = await connect();
   const drafted = await call('draft_evening_plan', { maxMinutes: 30 });

@@ -1,4 +1,4 @@
-# Submission text (Relay Home 2.1)
+# Submission text (Relay Home 2.2)
 
 Track: **Alexa+** (self-hosted MCP server and Agent Skill, shown through a simulated Alexa+ experience).
 
@@ -17,8 +17,9 @@ spending money.
 ## What it does
 
 You tell Relay what changed. It reads the household, checks in parallel who may collect the child and which dinners
-fit, and drafts one plan. On a screen it shows that plan as cards: who can be asked and why the others cannot, the
-dinner options with what is already at home, the evening at a glance.
+fit, and drafts one plan. On a screen it shows that plan as cards: the evening at a glance, the dinner options with
+what is already at home, and every adult's arrival drawn to scale against the school's deadline, so you can see why
+Jo is asked, why Sam is five minutes late, and why Lee, who would be first, is never suggested.
 
 Then it asks. "Ask Jo to collect Mia at Oakfield School, main gate by 5:15 PM?" Only a yes records the request, and
 the pickup stays "awaiting reply" until Jo answers; Relay never calls it covered before that. Jo answers for
@@ -58,14 +59,19 @@ preview tools are not open to participants, so this runs in a browser page that 
 - **MCP Apps views.** Four `ui://` cards (evening, helpers, dinners, receipt). Our page is a real MCP Apps host: it
   reads each view from the server, shows it in a sandboxed frame through `AppBridge`, and forwards only read-only
   tool calls from a card. A tap on a card sends a message into the conversation instead of acting, so every action
-  still passes the agent and the confirmation.
+  still passes the agent and the confirmation. The cards take their colours, type and radii from the MCP Apps host
+  style variables, so they sit natively in whatever host shows them and fall back to their own light or dark palette.
+- **Design.** The page is a kitchen display at dusk with the helper's phone beside it: the phone sleeps on a lock
+  screen and wakes with the one question when someone is asked. Under the display, every MCP call the agent made is
+  listed with its arguments and timing. Reused rather than invented: Radix Colors, Lucide icons, Open Props easings
+  and the Devices.css phone frame (all MIT or ISC, copied in as values; see `THIRD_PARTY_NOTICES.md`).
 - **Agent Skill.** `skills/relay-home-evening` (agentskills.io layout) tells an agent the order of work and the rules
   it must not bend. The simulator's agent loads it and reaches the household only through the MCP endpoint.
 - **Agent.** A small loop that runs independent tool calls in parallel. In the demo video the agent is Gemini 3.5
   Flash-Lite following the skill. Without a key a built-in scripted model takes its place, so the project still runs
   out of the box and behaves the same every time; an adapter for any OpenAI-compatible service is included too.
 - **Rules in the server.** Every rule above is enforced by the server and covered by tests, so an agent that
-  ignores the skill still cannot get past them. 33 tests: the rules, the server in memory, the real HTTP endpoint on
+  ignores the skill still cannot get past them. 34 tests: the rules, the server in memory, the real HTTP endpoint on
   both protocol revisions, the helper's link, the agent, the model adapters.
 
 ## Challenges
@@ -102,7 +108,7 @@ Agent Skills, Express, Zod, esbuild, HTML/CSS/JavaScript; Python, Strands Agents
 ## Notes for the form
 
 - Live demo: https://relay-home.onrender.com (free instance; Gemini 3.5 Flash-Lite on a free quota, scripted model as stand-in; MCP endpoint at `/mcp`).
-- Video: `‹new YouTube URL›` once published (1:52; the current public one, https://youtu.be/W3LUTcaPIeE, is the 2.0 film; notes in `docs/demo-video.md`). Repository: https://github.com/yy5652-hash/relay-home (public, MIT).
+- Video: `‹new YouTube URL›` once published (1:58; the current public one, https://youtu.be/W3LUTcaPIeE, is the 2.0 film; notes in `docs/demo-video.md`). Repository: https://github.com/yy5652-hash/relay-home (public, MIT).
 - Product feedback and friction log: `docs/product-feedback.md`.
 - AI coding assistance was used to write this project.
 - AWS Builder: Strands Agents SDK, documented in `integrations/strands/README.md`; Bedrock not run (no AWS account).

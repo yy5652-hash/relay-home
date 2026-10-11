@@ -11,6 +11,17 @@ const el = (tag, attrs = {}, ...children) => {
 };
 const money = amount => `$${Number(amount).toFixed(2)}`;
 const theme = 'dark';      // the display is a device of its own and stays dark
+// What the display tells every card about its surface, ink and type: the MCP Apps style variables. The cards stand
+// on the display's own glass (a transparent ground), in the display's colours, instead of bringing their own.
+const DISPLAY_STYLE = {
+  '--color-background-primary': 'transparent', '--color-background-secondary': 'rgba(255, 255, 255, 0.05)', '--color-background-tertiary': 'rgba(255, 255, 255, 0.1)',
+  '--color-background-info': '#7ce2fe', '--color-background-success': 'rgba(70, 167, 88, 0.17)', '--color-background-warning': 'rgba(255, 197, 61, 0.13)', '--color-background-danger': 'rgba(229, 77, 46, 0.17)',
+  '--color-text-primary': '#edeef0', '--color-text-secondary': '#b0b4ba', '--color-text-tertiary': '#777b84', '--color-text-inverse': '#0d141f',
+  '--color-text-info': '#75c7f0', '--color-text-success': '#71d083', '--color-text-warning': '#ffca16', '--color-text-danger': '#ff977d',
+  '--color-border-primary': 'rgba(255, 255, 255, 0.1)', '--color-border-secondary': 'rgba(255, 255, 255, 0.06)', '--border-radius-lg': '18px',
+  '--font-sans': 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+  '--font-mono': 'ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace'
+};
 
 let token;
 let busy = false;
@@ -25,11 +36,27 @@ async function start() {
   $('endpoint').textContent = `${location.origin}/mcp`;
   await household();
   // The household outlives the page: a plan drawn earlier, on this device or by another MCP client, is back on screen.
-  const kept = (await (await api('/api/tool', { method: 'POST', body: JSON.stringify({ name: 'get_household', arguments: {} }) })).json()).structuredContent?.plan;
+  const home = (await (await api('/api/tool', { method: 'POST', body: JSON.stringify({ name: 'get_household', arguments: {} }) })).json()).structuredContent;
+  glance(home);
+  const kept = home?.plan;
   if (kept) await card({ view: 'ui://relay-home/plan.html', name: 'get_household', args: {}, summary: kept.summary, data: { plan: kept } });
   const refresh = () => { if (!busy && !document.hidden) household().catch(() => {}); };
   setInterval(refresh, 2500);
   document.addEventListener('visibilitychange', refresh);
+}
+
+// The display at rest shows tonight's three facts, from the same get_household answer an agent would read.
+function glance(home) {
+  if (!home || !$('g-pickup')) return;
+  const { weeklyGroceryCap: cap, spentThisWeek: spent } = home.memory;
+  $('g-pickup').textContent = home.pickup.by;
+  $('g-pickup-note').textContent = `${home.child} · ${home.pickup.where}`;
+  $('g-dinner').textContent = home.dinner.at;
+  $('g-dinner-note').textContent = `${home.dinner.cook} cooks${home.memory.vegetarian ? ' · vegetarian' : ''}`;
+  $('g-left').textContent = money(cap - spent);
+  $('g-left-note').textContent = `left of ${money(cap)} this week`;
+  const meter = $('g-meter');      // kept by reference: a card may replace this panel before the next frame
+  requestAnimationFrame(() => { meter.style.width = `${Math.max(0, Math.min(100, (spent / cap) * 100))}%`; });
 }
 
 // ---------------------------------------------------------------- conversation
@@ -128,15 +155,20 @@ function confirmSheet(question) {
 }
 
 // ---------------------------------------------------------------- cards (MCP Apps host)
+// Cards that run under the top or bottom of the screen area fade out there, only while there is more to scroll to.
+const edges = () => { const zone = $('screen'); zone.classList.toggle('more-above', zone.scrollTop > 2); zone.classList.toggle('more-below', zone.scrollTop + zone.clientHeight < zone.scrollHeight - 2); };
+$('screen').addEventListener('scroll', edges, { passive: true });
+new MutationObserver(edges).observe($('screen'), { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'height'] });
+addEventListener('resize', edges);
 const views = new Map();
 async function card(event) {
   if (!views.has(event.view)) views.set(event.view, await (await api(`/api/view?uri=${encodeURIComponent(event.view)}`)).text());
   const frame = el('iframe', { class: 'card', sandbox: 'allow-scripts', title: event.name });
   $('screen').querySelector('.empty')?.remove();
   $('screen').querySelector(`figure[data-view="${event.view}"]`)?.remove();
-  $('screen').prepend(el('figure', { 'data-view': event.view }, frame, el('figcaption', {}, el('code', {}, event.view), ` · result of ${event.name}`)));
+  $('screen').prepend(el('figure', { 'data-view': event.view }, frame, el('figcaption', {}, el('span', {}, 'MCP Apps view · ', el('code', {}, event.view)), el('span', {}, event.name))));
   $('screen').scrollTo({ top: 0, behavior: 'smooth' });     // a new card comes into view, whatever was being looked at
-  const bridge = new AppBridge(null, { name: 'Relay Home simulator', version: '2.1.0' }, { serverTools: {}, openLinks: {} }, { hostContext: { theme, displayMode: 'inline', platform: 'web' } });
+  const bridge = new AppBridge(null, { name: 'Relay Home simulator', version: '2.2.0' }, { serverTools: {}, openLinks: {} }, { hostContext: { theme, displayMode: 'inline', platform: 'web', styles: { variables: DISPLAY_STYLE } } });
   bridge.oninitialized = () => {
     bridge.sendToolInput({ arguments: event.args ?? {} });
     bridge.sendToolResult({ content: [{ type: 'text', text: event.summary }], structuredContent: event.data });
@@ -161,9 +193,9 @@ async function household() {
   announced = home.announcements.length;
   // The helper's phone: the page behind the newest reply link, shown beside the display.
   const asked = home.requests.findLast(request => request.replyUrl && request.status !== 'withdrawn');
-  $('phone').hidden = !asked;
+  $('phone').classList.toggle('awake', Boolean(asked));
+  $('phone-who').textContent = asked ? asked.name : 'The helper';
   if (asked) {
-    $('phone-who').textContent = asked.name;
     const path = new URL(asked.replyUrl, location.origin).pathname;
     if (!$('phone-frame').src.endsWith(path)) $('phone-frame').src = path;
   }

@@ -1,23 +1,24 @@
 # Demo video
 
-Length 1:56, 1920x1080, English, burned-in captions, with a matching `.srt`. It shows Relay Home 2.1: the kitchen
+Length 1:58, 1920x1080, English, burned-in captions, with a matching `.srt`. It shows Relay Home 2.2: the kitchen
 display, and Jo answering from their own phone.
 
 **The brief it was cut to: a piece of craft, and a piece of evidence.**
 
-*Craft.* One subject per shot (the display, the phone, a figure, or a line of text on black); no counters, badges
+*Craft.* One subject per shot (the display, the phone, a card, a figure, or a line of text on black); no counters, badges
 or stamps; one short caption per sentence; a soft synthesised bed that stops for the moment that matters. The arc: a
 quiet open (the notice, one line), the plan, the ask, then the one moment the film is built around, at
-1:04.0, when Jo taps yes on their phone and the display, on its own, says so, with a single
+1:06.5, when Jo taps yes on their phone and the display, on its own, says so, with a single
 note. After it: the exact total, the no, the wire, three numbers, the line.
 
 *Evidence.* Every number on screen was measured in the recording it appears in, and carries its unit and what was
 measured:
 
-- **Figure 1, "Who can be at the gate by 5:15?"** A dot plot, to scale, of each adult's arrival against the
-  deadline, drawn from the server's own `find_pickup_helpers` and `get_household` answers at that moment of the take.
-  It shows the rule the product turns on in one picture: Lee arrives first and is still not eligible.
-- **Figure 2, "One yes, on the wire."** The consent round trip and the helper's answer as a sequence diagram. The
+- **The arrivals card, "Who can collect Mia".** Not a figure made for the film: the camera moves in on the product's
+  own helpers card, which draws each adult's arrival to scale against the deadline from the server's
+  `find_pickup_helpers` answer. It shows the rule the product turns on in one picture: Lee arrives first and is
+  still not eligible. (The 2.1 film drew this as an overlay; in 2.2 the card itself does it.)
+- **The figure, "One yes, on the wire."** The consent round trip and the helper's answer as a sequence diagram. The
   message names are the protocol's own (`tools/call`, `input_required`, `inputResponses`, `requestState`,
   `complete`); `node scripts/wire.mjs` prints the same exchange from a live server, so the figure can be checked.
   The times beside the arrows are this take's: how long after the call the question was on screen, how long the
@@ -26,17 +27,17 @@ measured:
   Under "Confirmed, from Jo's own phone": the delay between the tap and the announcement, with the reason it varies
   (the display checks every 2.5 s, so a take shows anything from 0.1 s to 2.6 s; this one shows what it measured).
 
-**What is on screen.** Behind the text cards and the two figures, everything is a recording of this repository's
+**What is on screen.** Behind the text cards and the figure, everything is a recording of this repository's
 simulator page running against its own MCP server on the same machine, driven by a script that clicks, types and
 taps the way a person would, on the display and on the helper's phone. Nothing is mocked for the film: the cards,
 the confirmation sheet, the code, the phone page, the "Just in" announcements and the list of MCP calls are what the
 page showed. The agent in the recording is Gemini 3.5 Flash-Lite (`gemini-3.5-flash-lite`, free tier) following the
-skill; its answers are its own and are reproduced below. The captions, the pointer, the text cards and the two
-figures are drawn over the page for the film; the figures read their data from the page and the server while it runs.
+skill; its answers are its own and are reproduced below. The captions, the pointer, the text cards and the
+figure are drawn over the page for the film; the figure reads its data from the page and the server while it runs.
 
 **How it was made.** A headless Chromium plays a step list (say this sentence, click this, frame that). The picture
-is the browser's own screencast, placed on a 30 fps timeline by frame timestamps. The figures are drawn with D3 in
-the same page, so they are recorded in the same pass as everything else. The narration is a synthetic voice
+is the browser's own screencast, placed on a 30 fps timeline by frame timestamps. The figure is drawn with D3 in
+the same page, so it is recorded in the same pass as everything else. The narration is a synthetic voice
 (Kokoro, Apache-2.0). The bed is one slow chord per bar and one plucked note, synthesised by our own script; no
 existing recording, sample or melody is used. The reply link in the film is built on the hosted copy's address, so
 the code on screen points at relay-home.onrender.com; the phone beside the display opened the same page on the
@@ -53,23 +54,23 @@ recording machine.
 | 0:17.8 | Say what changed. |
 | 0:19.8 | Who can collect Mia. What dinner fits. One plan. |
 | 0:25.5 | Every step: a real MCP call. |
-| 0:30.3 | Four adults. One deadline. |
-| 0:32.4 | Not on the school list: never suggested. |
-| 0:41.0 | Nothing happens without your yes. |
-| 0:48.7 | Asked. Not covered until Jo answers. |
-| 0:52.8 | A private link, for this request only. |
-| 0:59.8 | Jo's phone. One question. |
-| 1:05.4 | Confirmed, from Jo's own phone. |
-| 1:11.2 | The exact total. Nothing more. |
-| 1:17.0 | Once. Inside the weekly cap. |
-| 1:20.5 | Jo cannot make it. |
-| 1:24.6 | It stops. It names no one. |
-| 1:31.1 | The yes, on the wire. |
-| 1:33.0 | The server asks. The answer is sealed to the question. |
-| 1:37.2 | Jo's phone answers the server itself. |
-| 1:41.5 | 12 tools. 2 protocol revisions. 33 tests. |
-| 1:45.0 | The same server, from a Strands agent. |
-| 1:51.1 | Relay Home. It asks before it acts. |
+| 0:32.6 | Four adults. One deadline. |
+| 0:34.7 | Not on the school list: never suggested. |
+| 0:43.0 | Nothing happens without your yes. |
+| 0:50.7 | Asked. Not covered until Jo answers. |
+| 0:54.8 | A private link, for this request only. |
+| 1:01.7 | Jo's phone. One question. |
+| 1:07.9 | Confirmed, from Jo's own phone. |
+| 1:15.0 | The exact total. Nothing more. |
+| 1:20.8 | Once. Inside the weekly cap. |
+| 1:24.3 | Jo cannot make it. |
+| 1:27.2 | It stops. It names no one. |
+| 1:33.7 | The yes, on the wire. |
+| 1:35.6 | The server asks. The answer is sealed to the question. |
+| 1:39.7 | Jo's phone answers the server itself. |
+| 1:44.1 | 12 tools. 2 protocol revisions. 34 tests. |
+| 1:47.7 | The same server, from a Strands agent. |
+| 1:53.0 | Relay Home. It asks before it acts. |
 
 ## The conversation in the film
 
@@ -77,22 +78,23 @@ What the page showed, in order. Relay's lines are the model's own; the two "Just
 announcements of what Jo did on their phone.
 
 **You:** School moved Mia's pickup to 5:15 and Alex's train is late. Keep dinner under $8.
-**Relay:** Jo can pick up Mia by 5:00 PM. For dinner, Sam can make chickpea and tomato soup at 6:10 PM using only the pantry, so it costs nothing. Shall I ask Jo to do the pickup?
+**Relay:** Jo can pick up Mia by 5:00 PM. For dinner, Sam can make chickpea and tomato soup at 6:10 PM using only pantry items for free. Shall I ask Jo to collect Mia?
 **You:** Ask Jo
-**Relay:** Jo has been asked to pick up Mia, and we are waiting for their reply.
+**Relay:** Jo has been asked to collect Mia and we are awaiting their reply.
 **Relay:** Jo confirmed. The pickup is covered.
 **You:** Make the pasta and order what we need.
-**Relay:** Jo has confirmed pickup, and I've ordered the spinach for the pasta for $3.20.
+**Relay:** Jo has confirmed the pickup. The grocery order for spinach ($3.20) has been placed for pickup at Corner Market from 5:45 PM, and Sam will make the tomato and chickpea pasta at 6:05 PM.
 **Relay:** Jo cannot do it and is left out for today. Nobody on the school pickup list can be there by 5:15 PM. Call the school or an approved adult; Relay will not suggest anyone else.
 
-Calls per turn: get_household, find_pickup_helpers, suggest_dinners, draft_evening_plan / ask_helper, confirmation / draft_evening_plan, quote_groceries, place_grocery_order, confirmation.
+Calls per turn: get_household, find_pickup_helpers, suggest_dinners, draft_evening_plan / ask_helper, confirmation / suggest_dinners, draft_evening_plan, quote_groceries, place_grocery_order, confirmation.
 
 ## What was reused, and what was not
 
 Checked on 10 October 2026, before deciding whether to rebuild the film on a template.
 
 Reused in this film:
-- **D3** ([d3/d3](https://github.com/d3/d3), ISC, 113k stars): scales, the time axis and the stroke transitions of the two figures. Ours: the data (read from the page and the server during the take), the layout and the styling.
+- **D3** ([d3/d3](https://github.com/d3/d3), ISC, 113k stars): the stroke transitions of the wire figure. Ours: the data (read from the page and the server during the take), the layout and the styling.
+- **The interface on screen** reuses Radix Colors (MIT), Lucide icons (ISC), Open Props easings (MIT) and the Devices.css iPhone frame (MIT); see `THIRD_PARTY_NOTICES.md` for what was taken and what was changed.
 - **Kokoro-82M** ([hexgrad/kokoro](https://github.com/hexgrad/kokoro), Apache-2.0, 9.2k stars): the narration voice, through `kokoro-onnx`; unchanged.
 - **Chromium's own screencast** (`Page.startScreencast` over the DevTools protocol, headless shell from Playwright's browser cache): the picture; frames carry their own timestamps, which is what keeps captions and the accent note on the clock.
 - **Our media kit from an earlier project** (`nw_media.py`, `build_music.py`: wav helpers, mixing with ducking, oscillator instruments and reverb): the quiet bed is one slow chord per bar and one plucked note built from those instruments; the EDM arrangement the kit ships was not used.

@@ -67,7 +67,7 @@ def main() -> int:
         return ElicitResult(action="accept", content={"confirm": True}) if answer in ("y", "yes") else ElicitResult(action="decline")
 
     relay = MCPClient(url=f"{RELAY_URL}/mcp", headers={"Authorization": f"Bearer {token}"}, elicitation_callback=ask_person,
-                      application_name="relay-strands-host", application_version="2.1.0")
+                      application_name="relay-strands-host", application_version="2.2.0")
 
     with relay:
         tools = [t for t in relay.list_tools_sync() if t.tool_name != "confirm_action"]

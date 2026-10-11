@@ -19,7 +19,7 @@ const refuse = text => ({ content: [{ type: 'text', text }], isError: true });
 // `canAsk` is false when the connection cannot carry a question back to the person (a stateless 2025-11-25 request).
 // `origin` is the address a helper's phone can reach this server at; reply links are built on it.
 export function createRelayServer({ homes, id, secret, canAsk = true, origin = '' }) {
-  const server = new McpServer({ name: 'relay-home', title: 'Relay Home', version: '2.1.0' }, {
+  const server = new McpServer({ name: 'relay-home', title: 'Relay Home', version: '2.2.0' }, {
     instructions: 'Relay Home rebuilds a family evening after a change of plan. Read first, draft a plan, then ask before anything is requested from a person or bought. A pickup is never "covered" until the helper has confirmed.'
   });
   const read = () => homes.read(id);
@@ -87,9 +87,11 @@ export function createRelayServer({ homes, id, secret, canAsk = true, origin = '
     description: 'Checks every known adult against the school pickup list, their calendar and travel time. Returns who is eligible and, for everyone else, the reason. Only eligible people may be asked.',
     inputSchema: z.object({ exclude: z.array(z.string()).max(4).optional().describe('Names to leave out, for example someone who already said no') })
   }, guarded(({ exclude }) => {
-    const options = pickupOptions(read(), { exclude });
+    const home = read();
+    const options = pickupOptions(home, { exclude });
     const ok = options.filter(option => option.eligible);
-    return reply(ok.length ? `${ok.map(option => `${option.name} (${option.role.toLowerCase()}, there by ${option.arrivesLabel})`).join(', ')} can make it.` : 'Nobody on the school pickup list can make it in time.', { options });
+    // `now` and `deadline` are minutes after midnight, like each option's `arrives`, so a card can draw them to scale.
+    return reply(ok.length ? `${ok.map(option => `${option.name} (${option.role.toLowerCase()}, there by ${option.arrivesLabel})`).join(', ')} can make it.` : 'Nobody on the school pickup list can make it in time.', { options, child: home.child, by: clock(home.pickup.deadline), deadline: home.pickup.deadline, now: home.now });
   }));
 
   server.registerTool('suggest_dinners', {
