@@ -1,15 +1,31 @@
 # Demo video
 
-Length 1:58, 1920x1080, English, burned-in captions, with a matching `.srt`. It shows Relay Home 2.2: the kitchen
-display, and Jo answering from their own phone.
+Length 2:05, 1920x1080, English, burned-in captions, with a matching `.srt`. It shows Relay Home 2.2: the kitchen
+display, and Jo answering from their own phone. It opens and closes on live action.
 
 **The brief it was cut to: a piece of craft, and a piece of evidence.**
 
-*Craft.* One subject per shot (the display, the phone, a card, a figure, or a line of text on black); no counters, badges
-or stamps; one short caption per sentence; a soft synthesised bed that stops for the moment that matters. The arc: a
-quiet open (the notice, one line), the plan, the ask, then the one moment the film is built around, at
-1:06.5, when Jo taps yes on their phone and the display, on its own, says so, with a single
-note. After it: the exact total, the no, the wire, three numbers, the line.
+*Craft.* The film has one image for what the product does: **an evening is a line of dominoes.** It is told with
+real objects filmed on black, in one cold, low-colour grade with grain, so the live action and the dark interface
+sit in one world:
+
+| At | Shot | What it says |
+|---|---|---|
+| 0:00 | An hourglass, sand running. Type: "4:40 PM", then "Mia's pickup moved to 5:15 · 35 minutes from now". | The deadline. |
+| 0:05 | An empty platform, a train's lights far down the tunnel. Type: "Alex · Delayed · train arrives 6:10 PM". | The parent who cannot be there. |
+| 0:08 | A line of dominoes, standing. On "One change." the first one goes; the line comes down. | The evening comes apart. |
+| 0:13 | **The same shot, backwards**: the line stands up again, and the name appears over it. | Relay rebuilds the evening. |
+| 0:20 to 1:04 | The product: one plan, the MCP calls behind it, who can collect Mia, the question, the yes, the code. | |
+| 1:05 | A hand and a phone against a window. | The answer is Jo's to give. |
+| 1:11.5 | Jo taps yes on their phone; the display says so on its own. One note. | The moment the film is built around. |
+| 1:35 | The dominoes again: a few go, slower and slower, and the line **stops** with most of it standing. | Jo drops out: Relay stops, and names no one. |
+| 1:39 to 1:57 | The yes on the wire, three numbers. | |
+| 1:58 | The line of dominoes, standing; nothing moves. "Relay Home. It asks before it acts." | |
+
+One subject per shot; no counters, badges or stamps; one short caption per sentence; amber is used for one thing
+only, the deadline, in the type as in the product's card. Sound: a clock's tick under the opening, the dominoes
+going down and, reversed, coming back up, then a soft bed that stops for the moment that matters. All of it is
+synthesised; nothing is sampled.
 
 *Evidence.* Every number on screen was measured in the recording it appears in, and carries its unit and what was
 measured:
@@ -27,19 +43,24 @@ measured:
   Under "Confirmed, from Jo's own phone": the delay between the tap and the announcement, with the reason it varies
   (the display checks every 2.5 s, so a take shows anything from 0.1 s to 2.6 s; this one shows what it measured).
 
-**What is on screen.** Behind the text cards and the figure, everything is a recording of this repository's
+**What is on screen.** Apart from the live action, the text cards and the figure, everything is a recording of this repository's
 simulator page running against its own MCP server on the same machine, driven by a script that clicks, types and
 taps the way a person would, on the display and on the helper's phone. Nothing is mocked for the film: the cards,
 the confirmation sheet, the code, the phone page, the "Just in" announcements and the list of MCP calls are what the
 page showed. The agent in the recording is Gemini 3.5 Flash-Lite (`gemini-3.5-flash-lite`, free tier) following the
 skill; its answers are its own and are reproduced below. The captions, the pointer, the text cards and the
 figure are drawn over the page for the film; the figure reads its data from the page and the server while it runs.
+The live action is stock footage and shows no one from the story: the family is made up, and the shots are of
+objects, a platform and a hand.
 
 **How it was made.** A headless Chromium plays a step list (say this sentence, click this, frame that). The picture
 is the browser's own screencast, placed on a 30 fps timeline by frame timestamps. The figure is drawn with D3 in
 the same page, so it is recorded in the same pass as everything else. The narration is a synthetic voice
-(Kokoro, Apache-2.0). The bed is one slow chord per bar and one plucked note, synthesised by our own script; no
-existing recording, sample or melody is used. The reply link in the film is built on the hosted copy's address, so
+(Kokoro, Apache-2.0). The bed is one slow chord per bar and two notes on a soft piano-like voice, synthesised by our own script; no
+existing recording, sample or melody is used. The live action is laid under the page afterwards: the recording
+notes when each shot starts and the moments the picture has to hit (the first domino, the turn backwards), each
+clip is graded once with ffmpeg, and the page, which is recorded on black, is added on top with a screen blend, so
+black stays footage and type stays type. The reply link in the film is built on the hosted copy's address, so
 the code on screen points at relay-home.onrender.com; the phone beside the display opened the same page on the
 recording machine.
 
@@ -47,30 +68,30 @@ recording machine.
 
 | At | Caption |
 |---|---|
-| 0:01.0 | 4:40. The school just moved Mia's pickup to 5:15. |
+| 0:00.7 | 4:40. The school just moved Mia's pickup to 5:15. |
 | 0:05.2 | Alex's train is late. |
-| 0:07.6 | One change. The whole evening comes apart. |
-| 0:11.9 | Relay Home rebuilds the evening. And it asks before it acts. |
-| 0:17.8 | Say what changed. |
-| 0:19.8 | Who can collect Mia. What dinner fits. One plan. |
-| 0:25.5 | Every step: a real MCP call. |
-| 0:32.6 | Four adults. One deadline. |
-| 0:34.7 | Not on the school list: never suggested. |
-| 0:43.0 | Nothing happens without your yes. |
-| 0:50.7 | Asked. Not covered until Jo answers. |
-| 0:54.8 | A private link, for this request only. |
-| 1:01.7 | Jo's phone. One question. |
-| 1:07.9 | Confirmed, from Jo's own phone. |
-| 1:15.0 | The exact total. Nothing more. |
-| 1:20.8 | Once. Inside the weekly cap. |
-| 1:24.3 | Jo cannot make it. |
-| 1:27.2 | It stops. It names no one. |
-| 1:33.7 | The yes, on the wire. |
-| 1:35.6 | The server asks. The answer is sealed to the question. |
-| 1:39.7 | Jo's phone answers the server itself. |
-| 1:44.1 | 12 tools. 2 protocol revisions. 34 tests. |
-| 1:47.7 | The same server, from a Strands agent. |
-| 1:53.0 | Relay Home. It asks before it acts. |
+| 0:08.8 | One change. The whole evening comes apart. |
+| 0:13.9 | Relay Home rebuilds the evening. And it asks before it acts. |
+| 0:20.0 | Say what changed. |
+| 0:22.0 | Who can collect Mia. What dinner fits. One plan. |
+| 0:28.5 | Every step: a real MCP call. |
+| 0:35.7 | Four adults. One deadline. |
+| 0:37.9 | Not on the school list: never suggested. |
+| 0:46.2 | Nothing happens without your yes. |
+| 0:53.9 | Asked. Not covered until Jo answers. |
+| 0:58.0 | A private link, for this request only. |
+| 1:05.2 | Jo's phone. One question. |
+| 1:12.9 | Confirmed, from Jo's own phone. |
+| 1:18.8 | The exact total. Nothing more. |
+| 1:24.6 | Once. Inside the weekly cap. |
+| 1:28.1 | Jo cannot make it. |
+| 1:32.2 | It stops. It names no one. |
+| 1:39.1 | The yes, on the wire. |
+| 1:41.0 | The server asks. The answer is sealed to the question. |
+| 1:45.1 | Jo's phone answers the server itself. |
+| 1:49.5 | 12 tools. 2 protocol revisions. 34 tests. |
+| 1:53.1 | The same server, from a Strands agent. |
+| 1:58.7 | Relay Home. It asks before it acts. |
 
 ## The conversation in the film
 
@@ -78,21 +99,24 @@ What the page showed, in order. Relay's lines are the model's own; the two "Just
 announcements of what Jo did on their phone.
 
 **You:** School moved Mia's pickup to 5:15 and Alex's train is late. Keep dinner under $8.
-**Relay:** Jo can pick up Mia by 5:00 PM. For dinner, Sam can make chickpea and tomato soup at 6:10 PM using only pantry items for free. Shall I ask Jo to collect Mia?
+**Relay:** Jo can pick up Mia by 5:00 PM. For dinner, Sam can make chickpea and tomato soup at 6:10 PM using only the pantry at no cost. Shall I ask Jo?
 **You:** Ask Jo
-**Relay:** Jo has been asked to collect Mia and we are awaiting their reply.
+**Relay:** Jo has been asked to collect Mia and we are waiting for their reply.
 **Relay:** Jo confirmed. The pickup is covered.
 **You:** Make the pasta and order what we need.
-**Relay:** Jo has confirmed the pickup. The grocery order for spinach ($3.20) has been placed for pickup at Corner Market from 5:45 PM, and Sam will make the tomato and chickpea pasta at 6:05 PM.
+**Relay:** Jo confirmed the pickup, and the spinach has been ordered for $3.20 for store pickup from 5:45 PM. Sam will make tomato and chickpea pasta starting at 6:05 PM.
 **Relay:** Jo cannot do it and is left out for today. Nobody on the school pickup list can be there by 5:15 PM. Call the school or an approved adult; Relay will not suggest anyone else.
 
-Calls per turn: get_household, find_pickup_helpers, suggest_dinners, draft_evening_plan / ask_helper, confirmation / suggest_dinners, draft_evening_plan, quote_groceries, place_grocery_order, confirmation.
+Calls per turn: get_household, find_pickup_helpers, suggest_dinners, draft_evening_plan / ask_helper, confirmation / draft_evening_plan, quote_groceries, place_grocery_order, confirmation.
 
 ## What was reused, and what was not
 
-Checked on 10 October 2026, before deciding whether to rebuild the film on a template.
+Checked on 10 October 2026, before deciding whether to rebuild the film on a template, and again on 12 October
+before adding live action.
 
 Reused in this film:
+- **Live action: four clips from Mixkit**, all under the Mixkit Stock Video Free License (commercial use and YouTube allowed, no attribution required; each clip's page was checked on 12 October 2026): [sand falling from an hourglass](https://mixkit.co/free-stock-video/sand-falling-from-an-hourglass-on-a-black-background-28901/), [train arriving to a subway station](https://mixkit.co/free-stock-video/train-arriving-to-a-subway-station-1622/), [domino effect](https://mixkit.co/free-stock-video/domino-effect-5246/), [hands texting on a smartphone](https://mixkit.co/free-stock-video/hands-shown-texting-on-a-smartphone-144/). What we changed: the grade, the framing, the speed, and for the dominoes the direction of time. Clips under Mixkit's "Restricted" licence (personal use only) were left out, which ruled out most footage of people.
+- **ffmpeg** (the grade: `eq`, `colorbalance`, `vignette`) and **Pillow** ([python-pillow/Pillow](https://github.com/python-pillow/Pillow), MIT-CMU; the screen blend of the page over the footage). Ours: the time map of each shot and the grain.
 - **D3** ([d3/d3](https://github.com/d3/d3), ISC, 113k stars): the stroke transitions of the wire figure. Ours: the data (read from the page and the server during the take), the layout and the styling.
 - **The interface on screen** reuses Radix Colors (MIT), Lucide icons (ISC), Open Props easings (MIT) and the Devices.css iPhone frame (MIT); see `THIRD_PARTY_NOTICES.md` for what was taken and what was changed.
 - **Kokoro-82M** ([hexgrad/kokoro](https://github.com/hexgrad/kokoro), Apache-2.0, 9.2k stars): the narration voice, through `kokoro-onnx`; unchanged.
@@ -101,6 +125,7 @@ Reused in this film:
 - The recorder, the in-page overlay and the assembly script are the ones written for the 2.0 film, cut down (the counters, badges, stamps and gauge were removed for this edition).
 
 Looked at and not used, with the reason:
+- [Zulko/moviepy](https://github.com/Zulko/moviepy) (MIT, 15k stars) and [mifi/editly](https://github.com/mifi/editly) (MIT): general editors on top of ffmpeg. Not used because the edit here is five plates under one recording with marks the recording itself sets, and neither has a screen blend; ffmpeg and Pillow, which both build on, were enough.
 - [zz41354899/SwiftClip](https://github.com/zz41354899/SwiftClip) (MIT, 32 Remotion templates in Apple light-mode style: Product Launch, Brand Reveal, Minimal Title, Metric Dashboard, End Screen) and [Curvable/motion](https://github.com/Curvable/motion) (MIT, 14 launch-video scenes): the closest thing to a ready-made keynote look for the three text cards. Not used this time because the film is dark and screen-recording-first, so each template would need restyling, and the cards are three lines of text; worth adopting for the next edition if the cards grow.
 - [yuxuant2025/vision-video-in-a-weekend](https://github.com/yuxuant2025/vision-video-in-a-weekend) (MIT, 248 stars): a recipe rather than a template; its "timing spine" (one table that places every voice line and every scene) is the same idea as our step list, and its script framework is for vision videos with talking heads, which this is not.
 - [AlexAnsart/demo-studio](https://github.com/AlexAnsart/demo-studio) (MIT): Playwright-driven narrated demos with smart zooms, ElevenLabs voice and Whisper alignment; the nearest open-source equivalent of our recorder. Not used because this film needs taps inside the helper's phone frame and the display's own announcements, which the skill does not drive, and because ElevenLabs is a paid service.

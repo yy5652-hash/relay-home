@@ -22,7 +22,7 @@ It is four things that work together:
 
 **Try it in the browser:** <https://relay-home.onrender.com> (a free instance: the first load can take up to a minute
 while it wakes; the agent there is Gemini 3.5 Flash-Lite on a free quota, and the scripted model takes over when
-that quota is used up). **Demo video:** <https://youtu.be/W3LUTcaPIeE> (the 2.0 film, 2:44). The current film (1:58, on the 2.2 interface, with the helper's phone and the consent exchange drawn from the take's own data) is on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media) until it is published;
+that quota is used up). **Demo video:** <https://youtu.be/W3LUTcaPIeE> (the 2.0 film, 2:44). The current film (2:05, on the 2.2 interface: it opens on live action, a line of dominoes that falls and then stands up again, and draws the consent exchange from the take's own data) is on the [`media` branch](https://github.com/yy5652-hash/relay-home/tree/media) until it is published;
 [`docs/demo-video.md`](docs/demo-video.md) says how it was recorded and reproduces the conversation in it.
 
 ![The evening card after Jo has confirmed and the groceries are ordered](docs/screenshots/evening-ordered.jpg)
