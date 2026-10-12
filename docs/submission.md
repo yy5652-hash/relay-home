@@ -1,4 +1,4 @@
-# Submission text (Relay Home 2.2)
+# Submission text (Relay Home 2.3)
 
 Track: **Alexa+** (self-hosted MCP server and Agent Skill, shown through a simulated Alexa+ experience).
 

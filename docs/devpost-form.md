@@ -1,4 +1,4 @@
-# Devpost form: the answers to paste (Relay Home 2.2)
+# Devpost form: the answers to paste (Relay Home 2.3)
 
 Prepared 9 October 2026 for the "Additional info" page of submission 1216490. Everything below is written to be
 pasted as is; the two URLs marked `‹›` are filled in once the open-source PR and the new video are public.
