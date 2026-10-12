@@ -61,8 +61,14 @@ test('a plan can be drafted, and buying asks the person before anything is order
   assert.match(asked[0], /^Buy .* for \$\d+\.\d\d\?/);
   assert.equal(bought.structuredContent.order.status, 'placed');
   assert.equal(homes.read('test-home').orders.length, 1);
+  // the result says what the order did to the week's money, so a card can show it
+  const { cap, order } = bought.structuredContent;
+  assert.equal(cap.weekly, 40);
+  assert.equal(Math.round((cap.before - cap.left) * 100), Math.round(order.total * 100));
+  assert.equal(cap.left, Math.round((40 - homes.read('test-home').memory.spentThisWeek) * 100) / 100);
   const again = await call('place_grocery_order', { quoteToken: quoted.quoteToken, orderKey: 'evening-1' });
   assert.equal(again.structuredContent.order.repeated, true);
+  assert.equal(again.structuredContent.cap, undefined);
   assert.equal(asked.length, 1);                                          // the retry bought nothing and asked nothing
   assert.equal(homes.read('test-home').orders.length, 1);
 });

@@ -65,7 +65,10 @@ export function createRelayServer({ homes, id, secret, canAsk = true, origin = '
     }
     const quote = readQuote(state.quoteToken, secret);
     const order = change(home => placeOrder(home, quote, { confirmedTotal: quote.total, key: state.key }));
-    return reply(order.repeated ? `Order ${order.id} was already placed with this key; nothing new was bought.` : `Confirmed and done: order ${order.id} placed for ${money(order.total)}. ${order.slotLabel}.`, { done: true, order });
+    const { weeklyGroceryCap: cap, spentThisWeek: spent } = read().memory;
+    // `cap` lets a card show what the order did to the week's money: what was left before, and what is left now.
+    return reply(order.repeated ? `Order ${order.id} was already placed with this key; nothing new was bought.` : `Confirmed and done: order ${order.id} placed for ${money(order.total)}. ${order.slotLabel}.`,
+      { done: true, order, ...(order.repeated ? {} : { cap: { weekly: cap, left: Math.round((cap - spent) * 100) / 100, before: Math.round((cap - spent + order.total) * 100) / 100 } }) });
   };
 
   server.registerTool('get_household', {

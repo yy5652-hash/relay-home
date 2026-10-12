@@ -29,7 +29,7 @@ function replyCode(url, who) {
   const rows = /^https?:/.test(url) ? qrCode(url) : null;
   const open = el('button', { class: 'link' }, `Open ${who}'s link here`);
   open.addEventListener('click', () => app.openLink({ url }).catch(() => {}));
-  const words = el('div', {}, label('smartphone', `${who} answers for themselves`), el('p', {}, `Scan this with ${who}'s phone.`), el('p', { class: 'quiet' }, 'A private link that answers only this request. Relay does not send it in this demo.'), open);
+  const words = el('div', {}, label('smartphone', `${who}'s private reply link`), el('p', {}, 'It answers this one request, and nothing else.'), el('p', { class: 'quiet' }, `A real deployment would message it to ${who}. This demo sends nothing, so the link is shown here: scan it with a phone, or open it.`), open);
   if (!rows) return el('section', { class: 'tile' }, words);
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svg.setAttribute('viewBox', `-2 -2 ${rows.length + 4} ${rows.length + 4}`);
@@ -39,6 +39,20 @@ function replyCode(url, who) {
   path.setAttribute('d', rows.map((row, y) => [...row].map((on, x) => (on === '1' ? `M${x} ${y}h1v1h-1z` : '')).join('')).join(''));
   svg.append(path);
   return el('section', { class: 'tile reply' }, el('div', { class: 'qr' }, svg), words);
+}
+
+// What an order did to the week's grocery money: the bar starts at what was left before and settles at what is left now.
+function capMeter(cap, spent) {
+  const share = amount => `${Math.max(0, Math.min(100, (amount / cap.weekly) * 100))}%`;
+  const left = el('i', { class: 'left', style: `width: ${share(cap.before)}` }), went = el('i', { class: 'went', style: 'width: 0%' });
+  const figure = el('b', {}, money(cap.before));
+  requestAnimationFrame(() => setTimeout(() => {
+    left.style.width = share(cap.left); went.style.width = share(spent);
+    const start = performance.now(), run = now => { const k = Math.min(1, (now - start) / 900), eased = 1 - (1 - k) ** 3; figure.textContent = money(cap.before + (cap.left - cap.before) * eased); if (k < 1) requestAnimationFrame(run); };
+    requestAnimationFrame(run);
+  }, 1500));
+  return el('section', { class: 'tile cap' }, label('shopping-bag', 'This week\'s grocery cap'), el('p', { class: 'figure' }, figure, el('span', { class: 'quiet' }, ` left of ${money(cap.weekly)}`)), el('div', { class: 'capbar' }, left, went),
+    el('p', { class: 'quiet' }, `${money(cap.before)} before this order · ${money(spent)} spent, once`));
 }
 
 const draw = {
@@ -81,10 +95,11 @@ const draw = {
       el('p', { class: 'quiet' }, meal.missing.length ? `Buy ${meal.missing.join(', ')} · ${money(meal.cost)}` : 'Everything is at home'),
       meal.eligible ? el('button', { say: `Make the ${meal.id === 'bowls' ? 'rice bowls' : meal.id}` }, 'Choose') : chip(meal.reasons[0], 'no'))))];
   },
-  receipt({ order }) {
+  receipt({ order, cap }) {
     const line = (name, amount, cls) => el('li', { class: cls }, el('span', {}, name), el('i'), el('span', {}, money(amount)));
     return [el('header', {}, el('h2', {}, order.status === 'placed' ? 'Order placed' : 'Order cancelled'), el('span', { class: 'quiet' }, `${order.shop} · ${order.id}`)),
       el('section', { class: 'tile receipt' }, label('receipt-text', 'Receipt'), el('ul', {}, order.lines.map(item => line(item.name, item.price)), order.fee ? line('Delivery', order.fee) : null, line('Total', order.total, 'total')), el('p', { class: 'quiet slot' }, icon('clock', 14), order.slotLabel)),
+      cap && capMeter(cap, order.total),
       order.status === 'placed' && el('div', { class: 'actions' }, el('button', { say: 'Cancel the order' }, 'Cancel order'))];
   }
 };

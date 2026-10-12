@@ -48,19 +48,22 @@ Then try this, in order:
    Three cards appear on the screen; *Under the hood*, below the display, lists the four MCP calls behind them.
    Scroll the cards: *Who can collect Mia* draws every adult's arrival against the 5:15 deadline, to scale.
 2. Click **Ask Jo** inside the card. Relay's question covers the display. Say **Yes**.
-   The card now reads "Asked · waiting for an answer" and shows a code for Jo's phone; Relay does not call the
-   pickup covered.
+   The card now reads "Asked · waiting for an answer" and shows Jo's private reply link as a code. A real
+   deployment would message that link to Jo; this demo sends nothing, so the display shows it. Relay does not
+   call the pickup covered.
 3. The phone beside the display has woken as *Jo's phone*, showing what the code opens. Tap **Yes, I will be there** on it
    (you are playing Jo; on the hosted copy you can scan the code with a real phone instead). Within a few seconds
    the display says "Just in · Jo confirmed" and the card changes to "Confirmed from their phone".
 4. Click **Pasta, and order it**. Relay prices the missing spinach, asks you to confirm $3.20, and places the order.
-   A receipt card appears and the evening card updates itself.
+   A receipt card appears, with the week's grocery cap moving from what was left to what is left now, and the
+   evening card updates itself.
 5. Ask **What do you remember?**, then reload the page: the evening card is back on the display, because the
    household is kept between sessions.
 
 Other things worth trying: on Jo's phone, tap **Something came up** after confirming (the display announces it, and
-with nobody else on the school list in time the plan stops and names no one); turn on **Voice** and answer a
-confirmation by saying yes or no; say "No" on a confirmation sheet (nothing happens, and the server does not put the question again);
+with nobody else on the school list in time the plan stops and names no one); turn on **Voice** (in Chrome),
+press the microphone and say what changed: the words appear as you say them, Relay speaks its answers, reads each
+confirmation out and listens for your yes or no; say "No" on a confirmation sheet (nothing happens, and the server does not put the question again);
 "Jo can't make it" (Jo is left out, and with nobody else eligible the plan is blocked and names no one);
 "Keep dinner under $2 and 20 minutes"; "Set the weekly cap to $22" and then try to order.
 
@@ -166,7 +169,9 @@ a stateless connection cannot be asked this way, so it receives a sealed five-mi
 host: it reads the resource from the server, puts it in a sandboxed frame, and talks to it through `AppBridge`.
 A tap on a card does not act; it sends a message into the conversation, so every action still goes through the agent
 and the confirmation. The evening card reads the household through the host every few seconds (read-only tools only),
-which is how it shows "Confirmed" or "Ordered" without a new card. See `web/view.js`, `web/host.js`, `src/mcp/views.js`.
+which is how it shows "Confirmed" or "Ordered" without a new card. When the host itself learns of a change (a
+helper's answer), it does not wait for that: MCP Apps has no "your data is stale" signal, so the host sends the
+evening card a fresh tool result. See `web/view.js`, `web/host.js`, `src/mcp/views.js`.
 
 ![Who can collect Mia: four adults drawn against the 5:15 deadline](docs/screenshots/who-can-collect.jpg)
 

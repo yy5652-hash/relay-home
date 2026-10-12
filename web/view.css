@@ -77,3 +77,6 @@ button.link { background: none; border: 0; padding: 4px 0; color: var(--accent);
 .receipt li { display: flex; align-items: baseline; gap: 8px; text-transform: capitalize; } .receipt li i { flex: 1; border-bottom: 1px dotted var(--ink3); opacity: .6; transform: translateY(-3px); }
 .receipt li span:last-child { font: 500 14px/1 var(--mono); } .receipt li.total { margin-top: 4px; padding-top: 10px; border-top: 1px solid var(--line); font-weight: 650; font-size: 17px; } .receipt li.total span:last-child { font-size: 17px; font-weight: 600; }
 .receipt .slot { display: flex; align-items: center; gap: 7px; margin-top: 4px; }
+/* the week's grocery cap after an order */
+.cap .figure { display: flex; align-items: baseline; gap: 2px; } .cap .figure b { font: 650 26px/1.1 var(--font); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.capbar { display: flex; height: 8px; border-radius: 999px; background: var(--line); overflow: hidden; margin: 2px 0; } .capbar i { display: block; height: 100%; transition: width .9s cubic-bezier(0, 0, .1, 1); } .capbar .left { background: var(--accent-solid); } .capbar .went { background: var(--wait); }

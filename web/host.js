@@ -161,6 +161,13 @@ $('screen').addEventListener('scroll', edges, { passive: true });
 new MutationObserver(edges).observe($('screen'), { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'height'] });
 addEventListener('resize', edges);
 const views = new Map();
+let evening = null;       // the bridge of the evening card on screen
+// MCP Apps has no way to tell a view its data is stale, so the host sends the evening card a fresh result itself.
+async function refreshEvening() {
+  if (!evening) return;
+  const result = await (await api('/api/tool', { method: 'POST', body: JSON.stringify({ name: 'get_household', arguments: {} }) })).json();
+  if (result.structuredContent?.plan) evening.sendToolResult({ content: result.content, structuredContent: { plan: result.structuredContent.plan } }).catch(() => {});
+}
 async function card(event) {
   if (!views.has(event.view)) views.set(event.view, await (await api(`/api/view?uri=${encodeURIComponent(event.view)}`)).text());
   const frame = el('iframe', { class: 'card', sandbox: 'allow-scripts', title: event.name });
@@ -172,6 +179,7 @@ async function card(event) {
   bridge.oninitialized = () => {
     bridge.sendToolInput({ arguments: event.args ?? {} });
     bridge.sendToolResult({ content: [{ type: 'text', text: event.summary }], structuredContent: event.data });
+    if (event.view.endsWith('/plan.html')) evening = bridge;
   };
   bridge.onsizechange = ({ height }) => { if (height) frame.style.height = `${Math.ceil(height)}px`; };
   // A card may read from the MCP server through the host; only read-only tools are forwarded.
@@ -189,7 +197,9 @@ let announced = null;
 async function household() {
   const home = await (await api('/api/home')).json();
   // What happened outside the conversation (a helper answering from their phone) is announced on the display.
-  if (announced !== null) for (const text of home.announcements.slice(announced)) { bubble('relay news', text); speak(text); }
+  const news = announced === null ? [] : home.announcements.slice(announced);
+  for (const text of news) { bubble('relay news', text); speak(text); }
+  if (news.length) refreshEvening();      // the card would find out by itself within a few seconds; this makes it now
   announced = home.announcements.length;
   // The helper's phone: the page behind the newest reply link, shown beside the display.
   const asked = home.requests.findLast(request => request.replyUrl && request.status !== 'withdrawn');
@@ -226,7 +236,8 @@ $('mic').onclick = () => {
   speechSynthesis?.cancel();
   const listener = new Recognition();
   listener.lang = 'en-US';
-  listener.onresult = event => send(event.results[0][0].transcript);
+  listener.interimResults = true;      // the words appear in the box while they are being said
+  listener.onresult = event => { const heard = event.results[event.results.length - 1]; $('say').value = heard[0].transcript; if (heard.isFinal) send(heard[0].transcript); };
   listener.onend = () => $('mic').classList.remove('on');
   $('mic').classList.add('on');
   listener.start();
