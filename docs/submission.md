@@ -71,7 +71,7 @@ preview tools are not open to participants, so this runs in a browser page that 
   Flash-Lite following the skill. Without a key a built-in scripted model takes its place, so the project still runs
   out of the box and behaves the same every time; an adapter for any OpenAI-compatible service is included too.
 - **Rules in the server.** Every rule above is enforced by the server and covered by tests, so an agent that
-  ignores the skill still cannot get past them. 34 tests: the rules, the server in memory, the real HTTP endpoint on
+  ignores the skill still cannot get past them. 35 tests: the rules, the server in memory, the real HTTP endpoint on
   both protocol revisions, the helper's link, the agent, the model adapters.
 
 ## Challenges

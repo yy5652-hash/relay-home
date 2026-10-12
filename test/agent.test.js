@@ -112,6 +112,25 @@ test('the Gemini adapter echoes the model\'s own parts on a tool turn and drops 
   assert.equal(body.systemInstruction.parts[0].text, 'Follow the skill.');
 });
 
+test('a briefly overloaded model service is asked again, a refusal is not', async () => {
+  const waited = [];
+  const pause = async ms => { waited.push(ms); };
+  const answer = { ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text: 'Jo can make it.' }] } }] }) };
+  let asked = 0;
+  const busyOnce = new GeminiModel({ key: 'k', pause, fetch: async () => (++asked === 1 ? { ok: false, status: 503 } : answer) });
+  assert.equal((await busyOnce.next({ instructions: '', tools: TOOLS, conversation: history() })).text, 'Jo can make it.');
+  assert.equal(asked, 2);
+  assert.equal(waited.length, 1);
+  asked = 0;
+  const busy = new GeminiModel({ key: 'k', pause, fetch: async () => { asked += 1; return { ok: false, status: 503 }; } });
+  await assert.rejects(busy.next({ instructions: '', tools: TOOLS, conversation: history() }), /answered 503/);
+  assert.equal(asked, 3);                                                   // once, and twice more
+  asked = 0;
+  const refused = new GeminiModel({ key: 'k', pause, fetch: async () => { asked += 1; return { ok: false, status: 429 }; } });
+  await assert.rejects(refused.next({ instructions: '', tools: TOOLS, conversation: history() }), ModelUnavailable);
+  assert.equal(asked, 1);                                                   // out of quota: asking again would not help
+});
+
 test('a refused or unreachable model service is reported as unavailable, and no key means the scripted model', async () => {
   const refused = new GeminiModel({ key: 'k', fetch: async () => ({ ok: false, status: 429 }) });
   await assert.rejects(refused.next({ instructions: '', tools: TOOLS, conversation: history() }), ModelUnavailable);

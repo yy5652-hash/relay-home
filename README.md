@@ -67,7 +67,7 @@ confirmation out and listens for your yes or no; say "No" on a confirmation shee
 "Jo can't make it" (Jo is left out, and with nobody else eligible the plan is blocked and names no one);
 "Keep dinner under $2 and 20 minutes"; "Set the weekly cap to $22" and then try to order.
 
-Run the tests with `pnpm test` (34 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
+Run the tests with `pnpm test` (35 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
 revisions, the helper's reply link, the agent, the model adapters).
 
 ## Host it
@@ -201,7 +201,8 @@ household only through the MCP endpoint, over HTTP, with the visitor's own token
 **Which model drives the agent.** By default a small scripted model follows the skill, so the project runs without a
 key and behaves the same every time. Set `GEMINI_API_KEY`, or `LLM_API_KEY` + `LLM_BASE_URL` + `LLM_MODEL` for any
 OpenAI-compatible service, and a hosted model takes its place with the same skill and tools (see `.env.example`).
-If the hosted model does not answer, the scripted one takes that turn and the page says so. Both adapters are
+A service that is briefly overloaded is asked again, twice; if the hosted model still does not answer, or refuses
+(quota, a bad key), the scripted one takes that turn and the page says so. Both adapters are
 tested against each service's wire format with a stand-in for the network, and the Gemini one has been run live
 (`gemini-3.5-flash-lite`, free tier); see "Limits" below.
 
@@ -219,7 +220,7 @@ skills/         the Agent Skill
 integrations/   a second host: the Strands agent (Python)
 web/            source of the card code and of the page's host code (bundled by `pnpm build`)
 public/         the simulator page (the display, the phone beside it) and reply.html (the helper's page)
-test/           34 tests
+test/           35 tests
 scripts/        the bundler, and `wire.mjs`: the consent round trip printed as it travels
 docs/           product feedback and friction log, submission text
 ```
