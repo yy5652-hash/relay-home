@@ -3,93 +3,145 @@
 4:40. The school just moved Mia's pickup to 5:15.
 
 2
-00:00:05,244 --> 00:00:06,817
+00:00:05,246 --> 00:00:06,819
 Alex's train is late.
 
 3
-00:00:08,770 --> 00:00:11,285
+00:00:08,774 --> 00:00:11,289
 One change. The whole evening comes apart.
 
 4
-00:00:13,936 --> 00:00:17,404
+00:00:12,595 --> 00:00:16,063
 Relay Home rebuilds the evening. And it asks before it acts.
 
 5
-00:00:20,005 --> 00:00:21,038
-Say what changed.
+00:00:19,601 --> 00:00:25,825
+[You] School moved Mia's pickup to 5:15 and Alex's train is late. Keep dinner under $8.
 
 6
-00:00:21,985 --> 00:00:26,280
-Who can collect Mia. What dinner fits. One plan.
+00:00:26,127 --> 00:00:29,042
+Who may collect Mia. What dinner fits.
 
 7
-00:00:28,519 --> 00:00:32,425
-Every step: a real MCP call.
+00:00:29,359 --> 00:00:31,051
+[Relay] Jo can pick up Mia by 5:00 PM.
 
 8
-00:00:35,716 --> 00:00:37,283
-Four adults. One deadline.
+00:00:31,233 --> 00:00:35,905
+[Relay] For dinner, Sam can make chickpea and tomato soup at 6:10 PM using only pantry items,
 
 9
-00:00:37,882 --> 00:00:43,079
-Not on the school list: never suggested.
+00:00:36,086 --> 00:00:37,304
+[Relay] so it costs nothing.
 
 10
-00:00:46,174 --> 00:00:52,450
-Nothing happens without your yes.
+00:00:37,486 --> 00:00:38,677
+[Relay] Shall I ask Jo?
 
 11
-00:00:53,881 --> 00:00:57,808
-Asked. Not covered until Jo answers.
+00:00:40,975 --> 00:00:42,542
+Four adults. One deadline.
 
 12
-00:00:57,969 --> 00:01:02,102
-A private link, for this request only.
+00:00:42,944 --> 00:00:46,651
+Not on the school list: never suggested.
 
 13
-00:01:05,185 --> 00:01:06,879
-Jo's phone. One question.
+00:00:48,722 --> 00:00:49,426
+[You] Ask Jo
 
 14
-00:01:12,934 --> 00:01:16,644
-Confirmed, from Jo's own phone.
+00:00:51,154 --> 00:00:55,043
+[Relay] Ask Jo to collect Mia at Oakfield School, main gate by 5:15 PM?
 
 15
-00:01:18,808 --> 00:01:23,170
-The exact total. Nothing more.
+00:00:55,627 --> 00:00:56,118
+[You] Yes.
 
 16
-00:01:24,578 --> 00:01:26,662
-Once. Inside the weekly cap.
+00:00:58,142 --> 00:01:01,808
+A private link, for Jo alone.
 
 17
-00:01:28,084 --> 00:01:30,128
-Jo cannot make it.
+00:01:01,989 --> 00:01:05,090
+[Relay] I have asked Jo to pick up Mia, and they are awaiting reply.
 
 18
-00:01:32,207 --> 00:01:37,956
-It stops. It names no one.
+00:01:06,291 --> 00:01:07,985
+Jo's phone. One question.
 
 19
-00:01:39,082 --> 00:01:40,691
-The yes, on the wire.
+00:01:14,717 --> 00:01:15,833
+[Relay] Jo confirmed.
 
 20
-00:01:40,989 --> 00:01:44,837
-The server asks. The answer is sealed to the question.
+00:01:16,015 --> 00:01:17,259
+[Relay] The pickup is covered.
 
 21
-00:01:45,136 --> 00:01:47,565
-Jo's phone answers the server itself.
+00:01:19,121 --> 00:01:21,204
+[You] Make the pasta and order what we need.
 
 22
-00:01:49,467 --> 00:01:52,790
-12 tools. 2 protocol revisions. 34 tests.
+00:01:21,507 --> 00:01:24,317
+The pasta needs spinach. Relay gets a price.
 
 23
-00:01:53,090 --> 00:01:56,094
-The same server, from a Strands agent.
+00:01:24,499 --> 00:01:27,141
+[Relay] Buy spinach from Corner Market (simulated) for $3.20?
 
 24
-00:01:58,696 --> 00:02:00,969
+00:01:27,322 --> 00:01:29,475
+[Relay] Collect at the shop from 5:45 PM.
+
+25
+00:01:30,057 --> 00:01:30,548
+[You] Yes.
+
+26
+00:01:35,853 --> 00:01:38,261
+[Relay] Jo has confirmed the pickup for 5:15 PM.
+
+27
+00:01:38,440 --> 00:01:40,864
+[Relay] I have ordered spinach for $3.20, and
+
+28
+00:01:41,046 --> 00:01:44,434
+[Relay] Sam will make tomato and chickpea pasta starting at 6:05 PM.
+
+29
+00:01:44,735 --> 00:01:46,000
+The evening, rebuilt.
+
+30
+00:01:47,204 --> 00:01:48,417
+What if Jo says no?
+
+31
+00:01:52,867 --> 00:01:56,605
+[Relay] Call the school or an approved adult; Relay will not suggest anyone else.
+
+32
+00:01:56,907 --> 00:01:58,502
+It stops. It names no one.
+
+33
+00:01:59,834 --> 00:02:01,518
+One yes, on the wire.
+
+34
+00:02:01,818 --> 00:02:05,666
+The server asks. The answer is sealed to the question.
+
+35
+00:02:05,967 --> 00:02:08,396
+Jo's phone answers the server itself.
+
+36
+00:02:09,399 --> 00:02:12,905
+The same server, driven by a Strands agent.
+
+37
+00:02:15,507 --> 00:02:17,780
 Relay Home. It asks before it acts.
