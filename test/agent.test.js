@@ -131,6 +131,28 @@ test('a briefly overloaded model service is asked again, a refusal is not', asyn
   assert.equal(asked, 1);                                                   // out of quota: asking again would not help
 });
 
+test('a turn that ends without words is asked once more, and otherwise says what the server did', async () => {
+  const setupWith = async replies => {
+    const homes = new Homes(mkdtempSync(join(tmpdir(), 'relay-agent-')));
+    const server = createRelayServer({ homes, id: 'agent-home', secret: 'test-secret' });
+    const client = new Client({ name: 'agent-test', version: '1.0.0' }, { capabilities: { elicitation: { form: {} } } });
+    const [a, b] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(a), client.connect(b)]);
+    const seen = [];
+    const model = { next: async ({ conversation }) => { seen.push(conversation.messages.at(-1)); return replies.shift(); } };
+    const conversation = newConversation();
+    return { seen, say: text => runTurn({ client, model, skill: loadSkill(), conversation, text }) };
+  };
+  const look = { calls: [{ id: 'a1', name: 'find_pickup_helpers', args: {} }] };
+  const once = await setupWith([look, { text: '.' }, { text: 'Jo can collect Mia by 5:00 PM.' }]);
+  assert.equal(await once.say('Who can collect Mia?'), 'Jo can collect Mia by 5:00 PM.');
+  assert.match(once.seen.at(-1).text, /^\(Update from Relay Home, not said by the person: your last answer had no words/);
+  const twice = await setupWith([look, { text: '.' }, { text: ' ' }]);
+  assert.equal(await twice.say('Who can collect Mia?'), 'Jo (neighbour, there by 5:00 PM) can make it.');
+  const nothing = await setupWith([{ text: '' }, { text: '' }]);
+  assert.equal(await nothing.say('Hello'), 'Sorry, I lost my words there. Could you say that again?');
+});
+
 test('a model service that is slow to answer is asked a second time, and the first answer is used', async () => {
   const said = text => ({ ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text }] } }] }) });
   const signals = [];

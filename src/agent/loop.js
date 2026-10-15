@@ -2,6 +2,17 @@
 // when the model answers in words. Every step is reported through `emit`, which is what the simulator's
 // "Inside the plan" panel shows.
 const MAX_STEPS = 8;
+const worded = text => /\p{L}/u.test(text ?? '');
+// Now and then a model ends a turn without words: on 15 October 2026 Gemini answered "." after placing an order. It
+// is asked once more; if it still says nothing, the person hears the server's own line about the last thing done.
+const NO_WORDS = '(Update from Relay Home, not said by the person: your last answer had no words. Tell the person in one or two short sentences what was just done or found.)';
+function lastDone(conversation) {
+  const results = conversation.messages.findLast(message => message.role === 'tool')?.results ?? [];
+  const line = results.filter(result => !result.error && result.summary).map(result => result.summary).pop();
+  if (!line) return 'Sorry, I lost my words there. Could you say that again?';
+  const first = line.replace(/^Confirmed and done: /, '').split(/(?<=\.)\s/)[0];
+  return first.charAt(0).toUpperCase() + first.slice(1);
+}
 
 export async function runTurn({ client, model, skill, conversation, text, emit = () => {} }) {
   const { tools } = await client.listTools();
@@ -10,9 +21,15 @@ export async function runTurn({ client, model, skill, conversation, text, emit =
   for (let step = 0; step < MAX_STEPS; step += 1) {
     const move = await model.next({ instructions: skill.instructions, tools, conversation });
     if (!move.calls?.length) {
-      conversation.messages.push({ role: 'assistant', text: move.text });
-      emit({ type: 'say', text: move.text });
-      return move.text;
+      let text = move.text;
+      if (!worded(text)) {
+        conversation.messages.push({ role: 'assistant', text: text || '.' }, { role: 'note', text: NO_WORDS });
+        const again = await model.next({ instructions: skill.instructions, tools, conversation });
+        text = !again.calls?.length && worded(again.text) ? again.text : lastDone(conversation);
+      }
+      conversation.messages.push({ role: 'assistant', text });
+      emit({ type: 'say', text });
+      return text;
     }
     conversation.messages.push({ role: 'assistant', calls: move.calls, raw: move.raw });
     // Calls the model issued together are independent, so they run together.

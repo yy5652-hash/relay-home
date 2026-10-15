@@ -67,7 +67,7 @@ confirmation out and listens for your yes or no; say "No" on a confirmation shee
 "Jo can't make it" (Jo is left out, and with nobody else eligible the plan is blocked and names no one);
 "Keep dinner under $2 and 20 minutes"; "Set the weekly cap to $22" and then try to order.
 
-Run the tests with `pnpm test` (36 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
+Run the tests with `pnpm test` (37 tests: the rules, the MCP server in memory, the real HTTP endpoint on both protocol
 revisions, the helper's reply link, the agent, the model adapters).
 
 ## Host it
@@ -221,7 +221,7 @@ skills/         the Agent Skill
 integrations/   a second host: the Strands agent (Python)
 web/            source of the card code and of the page's host code (bundled by `pnpm build`)
 public/         the simulator page (the display, the phone beside it) and reply.html (the helper's page)
-test/           36 tests
+test/           37 tests
 scripts/        the bundler, and `wire.mjs`: the consent round trip printed as it travels
 docs/           product feedback and friction log, submission text
 ```

@@ -6,7 +6,7 @@ import { icon } from './icons.js';
 
 const kind = document.body.dataset.view;
 const root = document.getElementById('card');
-const app = new App({ name: `relay-home-${kind}`, version: '2.3.1' }, {}, { autoResize: true });
+const app = new App({ name: `relay-home-${kind}`, version: '2.3.2' }, {}, { autoResize: true });
 const money = amount => `$${Number(amount).toFixed(2)}`;
 const el = (tag, attrs = {}, ...children) => {
   const node = document.createElement(tag);

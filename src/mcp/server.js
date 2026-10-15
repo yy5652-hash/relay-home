@@ -19,7 +19,7 @@ const refuse = text => ({ content: [{ type: 'text', text }], isError: true });
 // `canAsk` is false when the connection cannot carry a question back to the person (a stateless 2025-11-25 request).
 // `origin` is the address a helper's phone can reach this server at; reply links are built on it.
 export function createRelayServer({ homes, id, secret, canAsk = true, origin = '' }) {
-  const server = new McpServer({ name: 'relay-home', title: 'Relay Home', version: '2.3.1' }, {
+  const server = new McpServer({ name: 'relay-home', title: 'Relay Home', version: '2.3.2' }, {
     instructions: 'Relay Home rebuilds a family evening after a change of plan. Read first, draft a plan, then ask before anything is requested from a person or bought. A pickup is never "covered" until the helper has confirmed.'
   });
   const read = () => homes.read(id);
