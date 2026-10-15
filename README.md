@@ -201,10 +201,11 @@ household only through the MCP endpoint, over HTTP, with the visitor's own token
 **Which model drives the agent.** By default a small scripted model follows the skill, so the project runs without a
 key and behaves the same every time. Set `GEMINI_API_KEY`, or `LLM_API_KEY` + `LLM_BASE_URL` + `LLM_MODEL` for any
 OpenAI-compatible service, and a hosted model takes its place with the same skill and tools (see `.env.example`).
-A service that is briefly overloaded is asked again, twice; if the hosted model still does not answer, or refuses
-(quota, a bad key), the scripted one takes that turn and the page says so. Both adapters are
-tested against each service's wire format with a stand-in for the network, and the Gemini one has been run live
-(`gemini-3.5-flash-lite`, free tier); see "Limits" below.
+A request the model service has not answered within 3 s is sent a second time and the first answer is used, which
+keeps a slow moment of the service from becoming a slow turn; a service that is briefly overloaded is asked again,
+twice. If the hosted model still does not answer, or refuses (quota, a bad key), the scripted one takes that turn
+and the page says so. Both adapters are tested against each service's wire format with a stand-in for the network,
+and the Gemini one drives the hosted copy (`gemini-3.5-flash-lite`).
 
 **State across sessions.** Each household is one JSON file under `.data/`, written atomically. The token is the
 sealed household id; the page keeps it in the browser, so a reload or a second MCP client sees the same evening.
@@ -226,18 +227,6 @@ docs/           product feedback and friction log, submission text
 ```
 
 `dist/view.js` and `public/host.js` are build outputs that are committed, so running needs no build step.
-
-## Limits
-
-- Not run on Alexa+. Whether Alexa+ renders MCP Apps views, answers `input_required`, or loads this skill the way the
-  simulator does is unknown to us.
-- The household, calendar, travel times, shop and prices are fixed demo data. No calendar, messaging or shop service
-  is connected. Relay makes the helper's reply link but does not send it: the display shows it as a code. Whoever
-  holds the link can answer that one request, and sees the child's first name, the place and the time.
-- The scripted model understands a limited set of sentences. The Gemini adapter has been run against the live
-  service; the OpenAI-compatible adapter only against the wire format.
-- The bearer token is a signed household id for a demo, not an OAuth flow. Do not put real personal data in it.
-- No user research: nobody outside the project has tried it, and no time saving has been measured.
 
 ## Licence
 

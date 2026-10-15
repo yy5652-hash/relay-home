@@ -131,6 +131,28 @@ test('a briefly overloaded model service is asked again, a refusal is not', asyn
   assert.equal(asked, 1);                                                   // out of quota: asking again would not help
 });
 
+test('a model service that is slow to answer is asked a second time, and the first answer is used', async () => {
+  const said = text => ({ ok: true, json: async () => ({ candidates: [{ content: { parts: [{ text }] } }] }) });
+  const signals = [];
+  let asked = 0;
+  const later = (ms, value) => new Promise(resolve => setTimeout(resolve, ms, value));
+  // The first copy takes 300 ms; after 20 ms a second copy goes out and answers at once. The first copy is cancelled.
+  const slowOnce = new GeminiModel({ key: 'k', hedge: 20, fetch: async (url, init) => { signals.push(init.signal); return ++asked === 1 ? later(300, said('slow')) : said('fast'); } });
+  assert.equal((await slowOnce.next({ instructions: '', tools: TOOLS, conversation: history() })).text, 'fast');
+  assert.equal(asked, 2);
+  assert.equal(signals[0].aborted, true);
+  assert.equal(signals[1].aborted, false);
+  // An answer inside the time is the only request.
+  asked = 0;
+  const prompt = new GeminiModel({ key: 'k', hedge: 200, fetch: async () => { asked += 1; return later(5, said('in time')); } });
+  assert.equal((await prompt.next({ instructions: '', tools: TOOLS, conversation: history() })).text, 'in time');
+  assert.equal(asked, 1);
+  // If the second copy fails, the first is still waited for.
+  asked = 0;
+  const secondFails = new GeminiModel({ key: 'k', hedge: 20, fetch: async () => (++asked === 1 ? later(80, said('first')) : { ok: false, status: 503 }) });
+  assert.equal((await secondFails.next({ instructions: '', tools: TOOLS, conversation: history() })).text, 'first');
+});
+
 test('a refused or unreachable model service is reported as unavailable, and no key means the scripted model', async () => {
   const refused = new GeminiModel({ key: 'k', fetch: async () => ({ ok: false, status: 429 }) });
   await assert.rejects(refused.next({ instructions: '', tools: TOOLS, conversation: history() }), ModelUnavailable);
