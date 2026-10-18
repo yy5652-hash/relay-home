@@ -61,8 +61,8 @@ Then try this, in order:
    household is kept between sessions.
 
 Other things worth trying: on Jo's phone, tap **Something came up** after confirming (the display announces it, and
-with nobody else on the school list in time the plan stops and names no one); turn on **Voice** (in Chrome),
-press the microphone and say what changed: the words appear as you say them, Relay speaks its answers, reads each
+with nobody else on the school list in time the plan stops and names no one); in Chrome,
+press the microphone and say what changed (that also switches on **Voice**): the words appear as you say them, Relay speaks its answers, reads each
 confirmation out and listens for your yes or no; say "No" on a confirmation sheet (nothing happens, and the server does not put the question again);
 "Jo can't make it" (Jo is left out, and with nobody else eligible the plan is blocked and names no one);
 "Keep dinner under $2 and 20 minutes"; "Set the weekly cap to $22" and then try to order.

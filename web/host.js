@@ -175,7 +175,7 @@ async function card(event) {
   $('screen').querySelector(`figure[data-view="${event.view}"]`)?.remove();
   $('screen').prepend(el('figure', { 'data-view': event.view }, frame, el('figcaption', {}, el('span', {}, 'MCP Apps view · ', el('code', {}, event.view)), el('span', {}, event.name))));
   $('screen').scrollTo({ top: 0, behavior: 'smooth' });     // a new card comes into view, whatever was being looked at
-  const bridge = new AppBridge(null, { name: 'Relay Home simulator', version: '2.3.2' }, { serverTools: {}, openLinks: {} }, { hostContext: { theme, displayMode: 'inline', platform: 'web', styles: { variables: DISPLAY_STYLE } } });
+  const bridge = new AppBridge(null, { name: 'Relay Home simulator', version: '2.3.3' }, { serverTools: {}, openLinks: {} }, { hostContext: { theme, displayMode: 'inline', platform: 'web', styles: { variables: DISPLAY_STYLE } } });
   bridge.oninitialized = () => {
     bridge.sendToolInput({ arguments: event.args ?? {} });
     bridge.sendToolResult({ content: [{ type: 'text', text: event.summary }], structuredContent: event.data });
@@ -234,6 +234,8 @@ const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 if (!Recognition) $('mic').hidden = true;
 $('mic').onclick = () => {
   speechSynthesis?.cancel();
+  // Whoever speaks to a kitchen display expects it to answer aloud, so the microphone switches Relay's voice on.
+  if (!voiceOn) { $('voice').checked = true; voiceOn = true; }
   const listener = new Recognition();
   listener.lang = 'en-US';
   listener.interimResults = true;      // the words appear in the box while they are being said
