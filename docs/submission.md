@@ -35,7 +35,7 @@ it, the plan stops and names no one; it will not suggest the neighbour who lives
 The household is remembered between sessions, and any MCP client that connects with the same token sees the same
 evening.
 
-Relay Home runs on a simulated Alexa+ kitchen display in the browser, as the hackathon FAQ provides while the Alexa+
+Relay Home runs on a simulated Alexa+ kitchen display in the browser, as the hackathon FAQ allows while the Alexa+
 preview tools are closed to participants. The family, the school and the shop are made up: the reply link is shown
 rather than sent, and no money moves. The live demo at relay-home.onrender.com runs Gemini 3.5 Flash-Lite.
 
