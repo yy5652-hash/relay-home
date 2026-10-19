@@ -79,7 +79,7 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
     const chat = chatOf(req.auth.extra.home);
     res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache', 'x-accel-buffering': 'no' });
     const emit = event => res.write(`data: ${JSON.stringify(event)}\n\n`);
-    const client = new Client({ name: 'relay-alexa-simulator', version: '2.3.3' }, { capabilities: { elicitation: { form: {} } }, versionNegotiation: { mode: 'auto' } });
+    const client = new Client({ name: 'relay-alexa-simulator', version: '2.3.4' }, { capabilities: { elicitation: { form: {} } }, versionNegotiation: { mode: 'auto' } });
     // Relay's confirmation question travels to the page and waits there for a tap.
     client.setRequestHandler('elicitation/create', request => new Promise(resolve => {
       const id = randomUUID();
@@ -113,7 +113,7 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
   // The page is the MCP Apps host. What a card needs from the MCP server (its ui:// resource, a read-only tool call)
   // is fetched here with the visitor's own token, exactly as any other client would.
   const asClient = async (req, work) => {
-    const client = new Client({ name: 'relay-simulator-host', version: '2.3.3' }, { versionNegotiation: { mode: 'auto' } });
+    const client = new Client({ name: 'relay-simulator-host', version: '2.3.4' }, { versionNegotiation: { mode: 'auto' } });
     try {
       await client.connect(new StreamableHTTPClientTransport(new URL(`http://127.0.0.1:${req.socket.localPort}/mcp`), { requestInit: { headers: { Authorization: `Bearer ${req.auth.token}` } } }));
       return await work(client);
@@ -146,7 +146,7 @@ export function createApp({ dataDir = process.env.RELAY_DATA_DIR ?? join(ROOT, '
     res.json({ ok: true });
   });
   app.post('/api/reset', requireBearerAuth({ verifier }), (req, res) => { homes.reset(req.auth.extra.home); chats.delete(req.auth.extra.home); res.json({ ok: true }); });
-  app.get('/api/health', (req, res) => res.json({ ok: true, name: 'relay-home', version: '2.3.3' }));
+  app.get('/api/health', (req, res) => res.json({ ok: true, name: 'relay-home', version: '2.3.4' }));
 
   // The helper's side. A reply link carries a random code and nothing else: it shows the one question that was
   // asked and takes one answer. It cannot read the household or do anything else, and needs no account.
